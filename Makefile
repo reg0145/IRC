@@ -2,11 +2,11 @@ NAME     = ircserv
 CXX      = c++
 CXXFLAGS = -Wall -Werror -Wextra -std=c++98
 
-SRCS = ./test/main.cpp \
-#	./srcs/server/IRCServer.cpp \
-#	./srcs/socket/ServerSocket.cpp \
-#	./srcs/reactor/SocketReactor.cpp \
-#	./srcs/session/Session.cpp
+SRCS = ./srcs/main.cpp \
+	./srcs/server/IRCServer.cpp \
+	./srcs/socket/ServerSocket.cpp \
+	./srcs/reactor/SocketReactor.cpp \
+	./srcs/session/Session.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
