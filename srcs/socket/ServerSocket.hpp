@@ -12,13 +12,14 @@ class ServerSocket
 	public :
 		ServerSocket();
 
-		int getSocket() const;
-
 		void bind(int port);
 		void listen();
 		int accept();
 
 		bool operator==(int socket) const;
+
+		int getSocket() const;
+
 
 	private :
 		int _socket;

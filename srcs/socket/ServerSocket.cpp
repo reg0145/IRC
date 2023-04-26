@@ -24,11 +24,6 @@ ServerSocket::ServerSocket()
 	}
 }
 
-int ServerSocket::getSocket() const
-{
-	return (_socket);
-}
-
 void ServerSocket::bind(int port)
 {
 	struct sockaddr_in serverAddr;
@@ -69,4 +64,9 @@ int ServerSocket::accept()
 bool ServerSocket::operator==(int socket) const
 {
 	return _socket == socket;
+}
+
+int ServerSocket::getSocket() const
+{
+	return (_socket);
 }
