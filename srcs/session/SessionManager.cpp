@@ -18,7 +18,12 @@ int SessionManager::registerSession(int clientSocket)
 		return -1;
 	}
 
-	Session *session = new Session(sessionIndex, clientSocket);
+	Session *session = new(std::nothrow) Session(sessionIndex, clientSocket);
+
+	if (session == 0)
+	{
+		return -1;
+	}
 
 	_sessionIndexMap[clientSocket] = sessionIndex;
 	_sessions[sessionIndex] = session;
