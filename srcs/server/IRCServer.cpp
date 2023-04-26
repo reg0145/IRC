@@ -15,7 +15,6 @@ void IRCServer::start()
 	while (true)
 	{
 		_socketReactor.run();
-		_.run();
 	}
 }
 
