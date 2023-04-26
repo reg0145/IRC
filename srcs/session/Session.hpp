@@ -3,7 +3,6 @@
 
 #include <unistd.h>
 #include <netinet/in.h>
-#include "../reactor/SocketReactor.hpp"
 
 class Session
 {
