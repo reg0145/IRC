@@ -1,4 +1,3 @@
-#include "SocketReactor.hpp"
 
 template <typename T>
 void SocketReactor<T>::init(T& object, EventHandler onEventSuccess, EventHandler onEventError)
