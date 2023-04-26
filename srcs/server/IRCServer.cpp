@@ -54,3 +54,11 @@ void IRCServer::onRequestErrorHandler(int socket)
 		_sessionManager.unRegisterSessionBySocket(socket);
 	}
 }
+
+//void IRCServer::process()
+//{
+//	for(std::deque<RecvPacketInfo>::iterator it = packetQueue.begin(); it != packetQueue.end(); ++it)
+//	{
+//		_packetManager.process(*it);
+//	}
+//}
