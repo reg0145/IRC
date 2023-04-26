@@ -1,49 +1,29 @@
 #include "Session.hpp"
 
-void (*Session::_onConnection)(Session *) = 0;
-
-Session::Session(int clientSocket) : _clientSocket(clientSocket)
+Session::Session(int sessionIndex, int clientSocket) : _sessionIndex(sessionIndex), _clientSocket(clientSocket)
 {
-	_onConnection(this);
 }
 
+#include <iostream>
 void Session::onReadable()
 {
-	int received;
+	int received = recv(_clientSocket, _buffer, sizeof(_buffer) - 1, 0);
 
-	received = recv(_clientSocket, _buffer, sizeof(_buffer), 0);
-	if (received == -1)
+	if (received < 1)
 	{
+		std::cout << ">> client[" << _sessionIndex << "] Disconnected <<" << std::endl;
 		close();
 	}
 	else
 	{
-		toPacketProcess(received, _buffer);
+		std::cout << "client[" << _sessionIndex << "] : " << _buffer << std::endl;
+		_buffer[received] = 0;
+		send(_clientSocket, _buffer, received, 0);
 	}
-}
-
-void Session::toPacketProcess(int bufferSize, char *buffer)
-{
-	const int MAX_PACKET_SIZE = 512;
-
-	/* Raw 패킷 유효성 검사 */
-	if (bufferSize > MAX_PACKET_SIZE)
-	{
-		/* 메시지 크기 초과 에러 보내기 */
-		return ;
-	}
-
-	(void)buffer;
 }
 
 void Session::close()
 {
 	::close(_clientSocket);
 	/* Reactor 이벤트 해제 필요*/
-}
-
-void Session::sendPacket(const char* data, const int size)
-{
-	/* send() 예외 처리 필요 */
-	send(_clientSocket, data, size, 0);
 }

@@ -1,36 +1,30 @@
-#ifndef IRC_SOCKET_REACTOR_HPP
-#define IRC_SOCKET_REACTOR_HPP
+#ifndef IRC_SOCKETREACTOR_HPP
+#define IRC_SOCKETREACTOR_HPP
 
-#include <cstdio>
-#include <cstdlib>
+#include <cerrno>
+#include <iostream>
 #include <sys/event.h>
-#include <netinet/in.h>
-#include <map>
-#include "../socket/ServerSocket.hpp"
-#include "../session/Session.hpp"
 
-class Session;
-
+template <class T>
 class SocketReactor
 {
-	public:
-		SocketReactor(ServerSocket serverSocket);
+	typedef void (T::*EventHandler)(int);
 
+	public:
+		void init(T& Object, EventHandler onEventSuccess, EventHandler onEventError);
 		void addSocket(int clientSocket);
 		void removeSocket(int clientSocket);
-		void accept();
 		void run();
 
 	private:
 		int _kqueue;
-
-		ServerSocket _serverSocket;
 		struct kevent *_currentEvent;
-		uintptr_t _currentEventSocket;
 
-		std::map<int, Session *> sessions;
-
-
+		T* _object;
+		EventHandler _onEventSuccess;
+		EventHandler _onEventError;
 };
+
+#include "SocketReactor.tpp"
 
 #endif

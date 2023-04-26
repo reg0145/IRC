@@ -4,20 +4,24 @@ ServerSocket::ServerSocket()
 {
 	if ((_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-		std::perror("ServerSocket : Failed to socket()");
+		std::cerr << "ServerSocket socket() : " << errno << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	/* SO_REUSEADDR 옵션 설정 */
 	int option = 1;
-	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) < 0) {
-		std::perror("ServerSocket : Failed to setsockopt()");
+	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) < 0)
+	{
+		std::cerr << "ServerSocket setsockopt() : " << errno << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	/* NONBLOCK 플래그 설정 */
-	int flags = fcntl(_socket, F_GETFL, 0);
-	fcntl(_socket, F_SETFL, flags | O_NONBLOCK);
+	if (fcntl(_socket, F_SETFL, O_NONBLOCK) < 0)
+	{
+		std::cerr << "ServerSocket fcntl() : " << errno << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
 int ServerSocket::getSocket() const
@@ -35,7 +39,7 @@ void ServerSocket::bind(int port)
 	/* 포트 바인딩 */
 	if (::bind(_socket, (struct sockaddr *)&serverAddr, sizeof(struct sockaddr_in)) < 0)
 	{
-		std::perror("ServerSocket : Failed to bind()");
+		std::cerr << "ServerSocket bind() : " << errno << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
@@ -44,18 +48,18 @@ void ServerSocket::listen()
 {
 	if (::listen(_socket, 10) < 0)
 	{
-		std::perror("ServerSocket : Failed to listen()");
+		std::cerr << "ServerSocket listen() : " << errno << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
 
 int ServerSocket::accept()
 {
-	int clientSocket;
+	int clientSocket = ::accept(_socket, 0, 0);
 
-	if ((clientSocket = ::accept(_socket, 0, 0)) < 0)
+	if (clientSocket < 0)
 	{
-		std::perror("ServerSocket : Failed to accept()");
+		std::cerr << "ServerSocket accept() : " << errno << std::endl;
 		return -1;
 	}
 
