@@ -1,10 +1,12 @@
 #ifndef PACKET_HPP
 #define PACKET_HPP
 
-struct IRCPacketHeader
+#include "../message/IRCMessage.hpp"
+
+struct RecvPacketInfo
 {
-	char prefix[64];
-	char
+	int sessionIndex;
+	IRCMessage &message;
 };
 
 #endif

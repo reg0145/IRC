@@ -25,5 +25,4 @@ class SessionManager {
 		std::deque<int> _sessionIndexPool;
 };
 
-
 #endif

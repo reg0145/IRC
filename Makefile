@@ -5,8 +5,10 @@ CXXFLAGS = -Wall -Werror -Wextra -std=c++98
 SRCS = ./srcs/main.cpp \
 	./srcs/server/IRCServer.cpp \
 	./srcs/socket/ServerSocket.cpp \
+	./srcs/session/Session.cpp \
 	./srcs/session/SessionManager.cpp \
-	./srcs/session/Session.cpp
+	./srcs/packet/PacketManager.cpp
+
 
 OBJS = $(SRCS:.cpp=.o)
 

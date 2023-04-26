@@ -16,20 +16,15 @@ class IRCServer
 		void init(int port, char *password);
 		void start();
 
+		//static std::deque<RecvPacketInfo> packetQueue;
+
 	private:
 		void onRequestHandler(int socket);
 		void onRequestErrorHandler(int socket);
 
-		int registerSession(int sessionIndex);
-		void unRegisterSession(int sessionIndex);
-
-		int takeSessionIndex();
-		void freeSessionIndex(int sessionIndex);
-
 		ServerSocket _serverSocket;
 		SocketReactor<IRCServer> _socketReactor;
 		SessionManager _sessionManager;
-		std::deque<int> _packetQueue;
 };
 
 #endif
