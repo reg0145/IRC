@@ -1,25 +1,21 @@
 #ifndef IRC_SESSION_HPP
 #define IRC_SESSION_HPP
 
-#include <netinet/in.h>
 #include <unistd.h>
-#include "../reactor/SocketReactor.hpp"
+#include <netinet/in.h>
 
 class Session
 {
 	public :
-		Session(int socket);
+		Session(int sessionIndex, int clientSocket);
 
 		void onReadable();
-		void sendPacket(const char* data, const int size);
-
-		static void (*_onConnection)(Session *);
 
 	private :
 		void close();
-		void toPacketProcess(int bufferSize, char *buffer);
 
 		char _buffer[512];
+		int _sessionIndex;
 		int _clientSocket;
 };
 

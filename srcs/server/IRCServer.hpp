@@ -1,11 +1,12 @@
 #ifndef IRC_SERVER_HPP
 #define IRC_SERVER_HPP
 
-#include <sys/socket.h>
-#include <sys/event.h>
 #include <deque>
 #include <vector>
+#include <iostream>
+#include <cerrno>
 #include "../session/Session.hpp"
+#include "../session/SessionManager.hpp"
 #include "../reactor/SocketReactor.hpp"
 #include "../socket/ServerSocket.hpp"
 
@@ -16,18 +17,18 @@ class IRCServer
 		void start();
 
 	private:
-		void setFunction();
+		void onRequestHandler(int socket);
+		void onRequestErrorHandler(int socket);
 
-		void sendPacket(int sessionIndex, const char* data, const int size);
+		int registerSession(int sessionIndex);
+		void unRegisterSession(int sessionIndex);
 
-		static int takeSessionIndex();
-		static void freeSessionIndex(int sessionIndex);
-		static void onConnect(Session *session);
+		int takeSessionIndex();
+		void freeSessionIndex(int sessionIndex);
 
 		ServerSocket _serverSocket;
-		SocketReactor *_socketReactor;
-		static std::vector<Session *> _sessions;
-		static std::deque<int> _sessionIndexPool;
+		SocketReactor<IRCServer> _socketReactor;
+		SessionManager _sessionManager;
 		std::deque<int> _packetQueue;
 };
 
