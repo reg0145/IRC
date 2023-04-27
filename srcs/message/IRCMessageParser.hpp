@@ -12,16 +12,35 @@ class IRCMessageParser
 		static std::list<IRCMessage> parse(const char* requests)
 		{
 			std::list<IRCMessage> IRCMessages;
-			std::string request;
+			std::vector<std::string> messages;
 
-			std::istringstream iss(requests);
-
-			while(std::getline(iss, request, '\n'))
+			messages = split(requests, "\r\n");
+			for (std::vector<std::string>::const_iterator it = messages.begin(); it != messages.end(); ++it)
 			{
-				IRCMessages.push_back(parseMessage(request));
+				IRCMessages.push_back(parseMessage(*it));
 			}
 
 			return IRCMessages;
+		}
+	
+		static std::vector<std::string> split(const std::string& str, const std::string& delimiter) 
+		{
+			std::vector<std::string> tokens;
+			std::string::size_type pos = 0;
+
+			while (pos != std::string::npos)
+			{
+					std::string::size_type end = str.find(delimiter, pos);
+					if (end == std::string::npos) 
+					{
+							tokens.push_back(str.substr(pos));
+							break;
+					}
+					tokens.push_back(str.substr(pos, end - pos));
+					pos = end + delimiter.size();
+			}
+
+			return tokens;
 		}
 
 	private:
@@ -31,13 +50,6 @@ class IRCMessageParser
 			std::istringstream ss(request);
 			std::string params;
 			std::string token;
-
-
-			if (request[0] == ':')
-			{
-				ss.ignore(1);
-				std::getline(ss, msg.prefix, ' ');
-			}
 
 			std::getline(ss, msg.command, ' ');
 
