@@ -51,13 +51,6 @@ class IRCMessageParser
 			std::string params;
 			std::string token;
 
-
-			if (request[0] == ':')
-			{
-				ss.ignore(1);
-				std::getline(ss, msg.prefix, ' ');
-			}
-
 			std::getline(ss, msg.command, ' ');
 
 			std::getline(ss, params, ':');
