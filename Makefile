@@ -7,8 +7,11 @@ SRCS = ./srcs/main.cpp \
 	./srcs/socket/ServerSocket.cpp \
 	./srcs/session/Session.cpp \
 	./srcs/session/SessionManager.cpp \
-	./srcs/packet/PacketManager.cpp
-
+	./srcs/packet/PacketManager.cpp \
+	./srcs/client/ClientManager.cpp \
+	./srcs/client/Client.cpp \
+	./srcs/channel/ChannelManager.cpp \
+	./srcs/channel/Channel.cpp 
 
 OBJS = $(SRCS:.cpp=.o)
 

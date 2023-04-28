@@ -1,5 +1,5 @@
-#ifndef IRC_IRCMESSAGEPARSER_HPP
-#define IRC_IRCMESSAGEPARSER_HPP
+#ifndef IRCMESSAGEPARSER_HPP
+#define IRCMESSAGEPARSER_HPP
 
 #include <list>
 #include <sstream>
@@ -25,22 +25,21 @@ class IRCMessageParser
 	
 		static std::list<std::string> split(const std::string& str, const std::string& delimiter)
 		{
-				std::list<std::string> tokens;
-				std::string::size_type pos = 0;
+			std::list<std::string> tokens;
+			std::string::size_type pos = 0;
 
-				while (pos != std::string::npos)
-				{
-						std::string::size_type end = str.find(delimiter, pos);
-						if (end == std::string::npos)
-						{
-								tokens.push_back(str.substr(pos));
-								break;
-						}
-						tokens.push_back(str.substr(pos, end - pos));
-						pos = end + delimiter.size();
-				}
+			while (pos != std::string::npos)
+			{
+					std::string::size_type end = str.find(delimiter, pos);
+					if (end == std::string::npos)
+					{
+						break;
+					}
+					tokens.push_back(str.substr(pos, end - pos));
+					pos = end + delimiter.size();
+			}
 
-				return tokens;
+			return tokens;
 		}
 
 	private:

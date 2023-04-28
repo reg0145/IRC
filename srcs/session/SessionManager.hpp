@@ -1,5 +1,5 @@
-#ifndef IRC_SESSIONMANAGER_HPP
-#define IRC_SESSIONMANAGER_HPP
+#ifndef SESSIONMANAGER_HPP
+#define SESSIONMANAGER_HPP
 
 #include <map>
 #include <deque>

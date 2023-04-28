@@ -1,5 +1,5 @@
-#ifndef IRC_SESSION_HPP
-#define IRC_SESSION_HPP
+#ifndef SESSION_HPP
+#define SESSION_HPP
 
 #include <list>
 #include <deque>
@@ -13,10 +13,13 @@ class Session
 {
 	public :
 		Session(int sessionIndex, int clientSocket);
+		~Session();
 
 		void onReadable();
 
-		static std::deque<RecvPacketInfo>* packetQueue;
+		int getClientSocket();
+		
+		static void(*_addPacketFunc)(int, int, IRCMessage&);
 
 	private :
 		void close();
