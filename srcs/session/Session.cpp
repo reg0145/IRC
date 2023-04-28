@@ -22,10 +22,11 @@ void Session::onReadable()
 		std::cout << "\"" << _buffer <<"\"" << std::endl;
 		for (std::list<IRCMessage>::iterator it = _messages.begin(); it != _messages.end(); it++)
 		{
+			std::cout << "- prefix: " << it->prefix << std::endl;
 			std::cout << "- command: " << it->command << std::endl;
 			std::cout << "- parameters[" <<  it->parameters.size() << "]: ";
 			for (std::vector<std::string>::iterator iter = it->parameters.begin(); iter != it->parameters.end(); ++iter)
-				std::cout << *iter << " ";
+				std::cout << *iter << ", ";
 			std::cout << "\n";
 			std::cout << "- traling: " << it->trailing << std::endl;
 			std::cout << std::endl;
