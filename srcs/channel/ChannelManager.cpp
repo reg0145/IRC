@@ -8,34 +8,60 @@ ChannelManager::~ChannelManager()
 {
 }
 
-void ChannelManager::checkChannel(std::string channelName)
+int ChannelManager::enterClient(std::string channelName, Client *client)
 {
 	Channel *channel = getChannel(channelName);
 
 	if (channel)
 	{
-		/* todo: join */
+		channel->addClient(client);
 	}
 	else
 	{
-		addChannel(channelName);
+		if (addChannel(channelName) == FAIL)
+		{
+			return FAIL;
+		}
+		enterClient(channelName, client);
 	}
+	return SUCCESS;
 }
 
-void ChannelManager::addChannel(std::string channelName)
+int ChannelManager::leaveClient(std::string channelName, Client *client)
 {
-	_channels[channelName] = new Channel(channelName);
-}
+	Channel *channel = getChannel(client->getChannel(channelName));
 
-void ChannelManager::removeChannel(std::string channelName)
-{
-	Channel *channel = getChannel(channelName);
-
-	if (channel)
+	if (!channel)
 	{
-		_channels.erase(channelName);
-		delete channel;
+		return FAIL;
 	}
+
+	channel->removeClient(client);
+
+	if (channel->getClientCount() == 0)
+	{
+		removeChannel(channel);
+	}
+	return SUCCESS;
+}
+
+int ChannelManager::addChannel(std::string channelName)
+{
+	Channel* channel = new(std::nothrow) Channel(channelName);
+
+	if (!channel)
+	{
+		return FAIL;
+	}
+
+	_channels[channelName] = channel;
+	return SUCCESS;
+}
+
+void ChannelManager::removeChannel(Channel *channel)
+{
+	_channels.erase(channel->getChannelName());
+	delete channel;
 }
 
 Channel* ChannelManager::getChannel(std::string channelName)

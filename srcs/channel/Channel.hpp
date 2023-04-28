@@ -3,7 +3,7 @@
 
 #include <map>
 #include <string>
-#include "Client.hpp"
+#include "../client/Client.hpp"
 
 class Channel
 {
@@ -11,9 +11,10 @@ class Channel
 		Channel(std::string channelName);
 		~Channel();
 
-		void addClient(std::string nickname, Client *client);
-		void removeClient(std::string nickname);
+		void addClient(Client *client);
+		void removeClient(Client *client);
 		std::string getChannelName();
+		int getClientCount();
 
 	private:
 		std::string _channelName;
