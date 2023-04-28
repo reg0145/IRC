@@ -1,5 +1,5 @@
-#ifndef IRC_MESSAGE_HPP
-#define IRC_MESSAGE_HPP
+#ifndef IRCMESSAGE_HPP
+#define IRCMESSAGE_HPP
 
 #include <string>
 #include <vector>

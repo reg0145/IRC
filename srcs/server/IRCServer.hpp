@@ -1,5 +1,5 @@
-#ifndef IRC_SERVER_HPP
-#define IRC_SERVER_HPP
+#ifndef IRCSERVER_HPP
+#define IRCSERVER_HPP
 
 #include <deque>
 #include <vector>
@@ -9,6 +9,7 @@
 #include "../session/SessionManager.hpp"
 #include "../reactor/SocketReactor.hpp"
 #include "../socket/ServerSocket.hpp"
+#include "../packet/PacketManager.hpp"
 
 class IRCServer
 {
@@ -16,15 +17,20 @@ class IRCServer
 		void init(int port, char *password);
 		void start();
 
-		//static std::deque<RecvPacketInfo> packetQueue;
+		static void addPacketFunc(int clientSocket, int sessionIndex, IRCMessage &message);
 
 	private:
 		void onRequestHandler(int socket);
 		void onRequestErrorHandler(int socket);
-
+		void process();
+		
 		ServerSocket _serverSocket;
 		SocketReactor<IRCServer> _socketReactor;
 		SessionManager _sessionManager;
+		PacketManager _packetManager;
+		
+		//void (Session::*_sendPacketFunc)(int, size_t);
+		static std::deque<RecvPacketInfo> _packetQueue;
 };
 
 #endif

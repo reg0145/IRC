@@ -1,5 +1,5 @@
-#ifndef IRC_SOCKETREACTOR_HPP
-#define IRC_SOCKETREACTOR_HPP
+#ifndef SOCKETREACTOR_HPP
+#define SOCKETREACTOR_HPP
 
 #include <cerrno>
 #include <iostream>

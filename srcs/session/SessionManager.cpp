@@ -34,13 +34,15 @@ int SessionManager::registerSession(int clientSocket)
 void SessionManager::unRegisterSession(int sessionIndex)
 {
 	freeSessionIndex(sessionIndex);
+	_sessionIndexMap.erase(_sessions[sessionIndex]->getClientSocket());
+	
+	delete _sessions[sessionIndex];
 	_sessions[sessionIndex] = 0;
 }
 
 void SessionManager::unRegisterSessionBySocket(int clientSocket)
 {
 	int sessionIndex = _sessionIndexMap[clientSocket];
-
 	unRegisterSession(sessionIndex);
 }
 

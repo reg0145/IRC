@@ -1,5 +1,7 @@
 #include "IRCServer.hpp"
 
+std::deque<RecvPacketInfo> IRCServer::_packetQueue = std::deque<RecvPacketInfo>();
+
 void IRCServer::init(int port, char *password)
 {
 	(void)password;
@@ -8,6 +10,10 @@ void IRCServer::init(int port, char *password)
 
 	_socketReactor.init(*this, &IRCServer::onRequestHandler, &IRCServer::onRequestErrorHandler);
 	_socketReactor.addSocket(_serverSocket.getSocket());
+	
+	_packetManager.init();
+
+	Session::_addPacketFunc = &IRCServer::addPacketFunc;
 }
 
 void IRCServer::start()
@@ -15,6 +21,7 @@ void IRCServer::start()
 	while (true)
 	{
 		_socketReactor.run();
+		process();
 	}
 }
 
@@ -55,10 +62,21 @@ void IRCServer::onRequestErrorHandler(int socket)
 	}
 }
 
-//void IRCServer::process()
-//{
-//	for(std::deque<RecvPacketInfo>::iterator it = packetQueue.begin(); it != packetQueue.end(); ++it)
-//	{
-//		_packetManager.process(*it);
-//	}
-//}
+void IRCServer::process()
+{
+	for(std::deque<RecvPacketInfo>::iterator it = _packetQueue.begin(); it != _packetQueue.end(); ++it)
+	{
+		_packetManager.process(it->clientSocket, it->sessionIndex, it->message);
+		if (it->message.command == "DISCONNECT")
+		{
+			_sessionManager.unRegisterSession(it->sessionIndex);
+		}
+	}
+	_packetQueue.clear();
+}
+
+void IRCServer::addPacketFunc(int clientSocket, int sessionIndex, IRCMessage &message)
+{
+	RecvPacketInfo packetInfo = {clientSocket, sessionIndex, message};
+	_packetQueue.push_back(packetInfo);
+}
