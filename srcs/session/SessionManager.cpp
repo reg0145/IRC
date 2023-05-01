@@ -1,5 +1,7 @@
 #include "SessionManager.hpp"
 
+std::vector<Session*> SessionManager::_sessions = std::vector<Session*>();
+
 SessionManager::SessionManager()
 {
 	for (int i = 0; i < 1024; ++i)
@@ -35,7 +37,7 @@ void SessionManager::unRegisterSession(int sessionIndex)
 {
 	freeSessionIndex(sessionIndex);
 	_sessionIndexMap.erase(_sessions[sessionIndex]->getClientSocket());
-	
+
 	delete _sessions[sessionIndex];
 	_sessions[sessionIndex] = 0;
 }
@@ -69,3 +71,9 @@ Session* SessionManager::getSessionBySocket(int clientSocket)
 	int sessionIndex = _sessionIndexMap[clientSocket];
 	return _sessions[sessionIndex];
 }
+
+void SessionManager::sendPacketFunc(int sessionIndex, std::string &res)
+{
+	_sessions[sessionIndex]->sendPacket(res);
+}
+

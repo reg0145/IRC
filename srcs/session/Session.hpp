@@ -15,10 +15,11 @@ class Session
 		~Session();
 
 		void onReadable();
+		void sendPacket(std::string&);
 
 		int getClientSocket();
 
-		static void(*_addPacketFunc)(int, int, IRCMessage&);
+		static void(*_addPacketFunc)(int, IRCMessage&);
 
 	private :
 		void close();
@@ -27,7 +28,6 @@ class Session
 		std::list<IRCMessage> _messages;
 		int _sessionIndex;
 		int _clientSocket;
-		PacketManager _packetManager;
 };
 
 #endif
