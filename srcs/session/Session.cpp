@@ -16,7 +16,7 @@ Session::~Session()
 void Session::onReadable()
 {
 	_messages.clear();
-	
+
 	int received = recv(_clientSocket, _buffer, sizeof(_buffer) - 1, 0);
 
 	if (received < 1)
@@ -26,17 +26,17 @@ void Session::onReadable()
 	else
 	{
 		_buffer[received] = 0;
-		_messages = IRCMessageParser::parse(_buffer);
+		_messages = IRCMessage::parse(_buffer);
 		std::cout << "\"" << _buffer <<"\"" << std::endl;
 		for (std::list<IRCMessage>::iterator it = _messages.begin(); it != _messages.end(); it++)
 		{
-			std::cout << "- prefix: " << it->prefix << std::endl;
-			std::cout << "- command: " << it->command << std::endl;
-			std::cout << "- parameters[" <<  it->parameters.size() << "]: ";
-			for (std::vector<std::string>::iterator iter = it->parameters.begin(); iter != it->parameters.end(); ++iter)
+			std::cout << "- prefix: " << it->_prefix << std::endl;
+			std::cout << "- command: " << it->_command << std::endl;
+			std::cout << "- parameters[" <<  it->_parameters.size() << "]: ";
+			for (std::vector<std::string>::iterator iter = it->_parameters.begin(); iter != it->_parameters.end(); ++iter)
 				std::cout << *iter << ", ";
 			std::cout << "\n";
-			std::cout << "- traling: " << it->trailing << std::endl;
+			std::cout << "- traling: " << it->_trailing << std::endl;
 			std::cout << std::endl;
 			_addPacketFunc(_clientSocket, _sessionIndex, *it);
 		}
@@ -46,7 +46,7 @@ void Session::onReadable()
 void Session::close()
 {
 	IRCMessage message;
-	message.command = "DISCONNECT";
+	message._command = "DISCONNECT";
 	_messages.push_back(message);
 
 	_addPacketFunc(_clientSocket, _sessionIndex, _messages.front());

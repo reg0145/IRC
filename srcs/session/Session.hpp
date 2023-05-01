@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include "../message/IRCMessage.hpp"
-#include "../message/IRCMessageParser.hpp"
 #include "../packet/PacketManager.hpp"
 
 class Session
@@ -18,7 +17,7 @@ class Session
 		void onReadable();
 
 		int getClientSocket();
-		
+
 		static void(*_addPacketFunc)(int, int, IRCMessage&);
 
 	private :

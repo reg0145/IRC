@@ -7,12 +7,13 @@ void PacketManager::init()
 	_recvFuntionDictionary["NICK"] = &PacketManager::processNick;
 	_recvFuntionDictionary["PASS"] = &PacketManager::processPass;
 	_recvFuntionDictionary["USER"] = &PacketManager::processUser;
+	_recvFuntionDictionary["PING"] = &PacketManager::processPing;
 }
 
 void PacketManager::process(int clientSocket, int sessionIndex, IRCMessage &message)
 {
 	std::map<std::string, PROCESS_RECV_PACKET_FUNCTION>::iterator it;
-  it = _recvFuntionDictionary.find(message.command);
+	it = _recvFuntionDictionary.find(message._command);
 
 	if (it == _recvFuntionDictionary.end())
 	{
@@ -22,55 +23,60 @@ void PacketManager::process(int clientSocket, int sessionIndex, IRCMessage &mess
 	(this->*(it->second))(clientSocket, sessionIndex, message);
 }
 
-void PacketManager::processDisconnect(int clientSocket, int sessionIndex, IRCMessage &message)
+void PacketManager::processDisconnect(int clientSocket, int sessionIndex, IRCMessage &req)
 {
-	(void)message;
+	(void)req;
 	(void)clientSocket;
 	std::cout << ">> client[" << sessionIndex << "] Disconnected <<" << std::endl;
 }
 
-void PacketManager::processPass(int clientSocket, int sessionIndex, IRCMessage &message)
+void PacketManager::processPass(int clientSocket, int sessionIndex, IRCMessage &req)
 {
 	(void)sessionIndex;
-	(void)message;
-	std::string res = "001 : process Pass Perfect!\r\n";
+	(void)req;
+
+	IRCMessage message;
+	message._command = "001";
+	message._trailing = "process pass!";
+
+	std::string res = message.toString();
 	send(clientSocket, res.c_str(), res.size(), 0);
 }
 
-void PacketManager::processNick(int clientSocket, int sessionIndex, IRCMessage &message)
+void PacketManager::processNick(int clientSocket, int sessionIndex, IRCMessage &req)
 {
 	(void)clientSocket;
 	Client* client = _clientManager.getClient(sessionIndex);
-	
+
 	if (!client->getIsPass())
 	{
 		return ;
 	}
-	
+
 	/* 파라미터 1개 이상 존재하는가?*/
-	if (message.parameters.size() != 1)
+	if (req._parameters.size() != 1)
 	{
 		//sendPacketFunc();
 		return ;
 	}
-	
+
 	/* 닉네임 중복여부 확인 */
-	std::string &nickname = message.parameters[0];
+	std::string &nickname = req._parameters[0];
 	if (_clientManager.checkNick(nickname))
 	{
 		//sendPacketFunc();
 		return ;
 	}
-	
+
 	client->setNickname(nickname);
-	
+
 	_clientManager.addClient(sessionIndex, nickname);
-	//sendPacketFunc();
 }
 
-void PacketManager::processUser(int clientSocket, int sessionIndex, IRCMessage &message)
+void PacketManager::processUser(int clientSocket, int sessionIndex, IRCMessage &req)
 {
 	(void)clientSocket;
+	(void)req;
 	if (_clientManager.checkClient(sessionIndex))
 	{
 		//sendPacketFunc();
@@ -78,28 +84,43 @@ void PacketManager::processUser(int clientSocket, int sessionIndex, IRCMessage &
 	}
 
 	/* 파라미터 1개 이상 존재하는가?*/
-	if (message.parameters.size() != 3)
+	if (req._parameters.size() != 3)
 	{
 		//sendPacketFunc();
 		return ;
 	}
-	
-	std::string &nickname = message.parameters[0];
+
+	std::string &nickname = req._parameters[0];
 	if (_clientManager.checkNick(nickname))
 	{
 		//sendPacketFunc();
 		return ;
 	}
 
-	
+
 	Client* client = _clientManager.getClient(sessionIndex);
-	std::string &hostname = message.parameters[1];
-	std::string &name = message.parameters[2];
+	std::string &hostname = req._parameters[1];
+	std::string &name = req._parameters[2];
 	client->setNickname(nickname);
 	client->setName(hostname);
 	client->setHostname(name);
-	
-	//sendPacketFunc();
 }
 
+void PacketManager::processPing(int clientSocket, int sessionIndex, IRCMessage &req)
+{
+	(void)sessionIndex;
+	(void)req;
 
+	if (req._parameters.size() != 1)
+	{
+		return ;
+	}
+
+	IRCMessage message;
+	message._command = "PONG";
+	message._parameters.push_back(req._parameters[0]);
+	message._trailing = ":process pass!";
+
+	std::string res = message.toString();
+	send(clientSocket, res.c_str(), res.size(), 0);
+}
