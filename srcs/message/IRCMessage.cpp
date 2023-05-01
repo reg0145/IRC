@@ -24,6 +24,10 @@ std::list<std::string> IRCMessage::split(const std::string& str, const std::stri
 			std::string::size_type end = str.find(delimiter, pos);
 			if (end == std::string::npos)
 			{
+				if (str.size() != pos)
+				{
+					tokens.push_back(str.substr(pos));
+				}
 				break;
 			}
 			tokens.push_back(str.substr(pos, end - pos));
