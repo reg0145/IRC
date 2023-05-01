@@ -23,12 +23,12 @@ class IRCServer
 		void onRequestHandler(int socket);
 		void onRequestErrorHandler(int socket);
 		void process();
-		
+
 		ServerSocket _serverSocket;
 		SocketReactor<IRCServer> _socketReactor;
 		SessionManager _sessionManager;
 		PacketManager _packetManager;
-		
+
 		//void (Session::*_sendPacketFunc)(int, size_t);
 		static std::deque<RecvPacketInfo> _packetQueue;
 };

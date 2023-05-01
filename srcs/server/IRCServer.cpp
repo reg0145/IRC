@@ -10,7 +10,7 @@ void IRCServer::init(int port, char *password)
 
 	_socketReactor.init(*this, &IRCServer::onRequestHandler, &IRCServer::onRequestErrorHandler);
 	_socketReactor.addSocket(_serverSocket.getSocket());
-	
+
 	_packetManager.init();
 
 	Session::_addPacketFunc = &IRCServer::addPacketFunc;
@@ -67,7 +67,7 @@ void IRCServer::process()
 	for(std::deque<RecvPacketInfo>::iterator it = _packetQueue.begin(); it != _packetQueue.end(); ++it)
 	{
 		_packetManager.process(it->clientSocket, it->sessionIndex, it->message);
-		if (it->message.command == "DISCONNECT")
+		if (it->message._command == "DISCONNECT")
 		{
 			_sessionManager.unRegisterSession(it->sessionIndex);
 		}

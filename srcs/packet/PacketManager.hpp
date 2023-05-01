@@ -12,12 +12,13 @@ class PacketManager
 {
 	public:
 		void init();
-		void process(int clientSocket, int sessionIndex, IRCMessage &message);
-		
-		void processDisconnect(int clientSocket, int sessionIndex, IRCMessage &message);
-		void processNick(int clientSocket, int sessionIndex, IRCMessage &message);
-		void processPass(int clientSocket, int sessionIndex, IRCMessage &message);
-		void processUser(int clientSocket, int sessionIndex, IRCMessage &message);
+		void process(int clientSocket, int sessionIndex, IRCMessage &req);
+
+		void processDisconnect(int clientSocket, int sessionIndex, IRCMessage &req);
+		void processNick(int clientSocket, int sessionIndex, IRCMessage &req);
+		void processPass(int clientSocket, int sessionIndex, IRCMessage &req);
+		void processUser(int clientSocket, int sessionIndex, IRCMessage &req);
+		void processPing(int clientSocket, int sessionIndex, IRCMessage &req);
 
 	private:
 		ClientManager _clientManager;
