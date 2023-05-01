@@ -8,10 +8,12 @@ SRCS = ./srcs/main.cpp \
 	./srcs/session/Session.cpp \
 	./srcs/session/SessionManager.cpp \
 	./srcs/packet/PacketManager.cpp \
+	./srcs/message/IRCMessage.cpp \
 	./srcs/client/ClientManager.cpp \
 	./srcs/client/Client.cpp \
 	./srcs/channel/ChannelManager.cpp \
-	./srcs/channel/Channel.cpp 
+	./srcs/channel/Channel.cpp
+
 
 OBJS = $(SRCS:.cpp=.o)
 

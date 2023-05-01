@@ -6,6 +6,8 @@
 #include <vector>
 #include "Session.hpp"
 
+class Session;
+
 class SessionManager {
 	public:
 		SessionManager();
@@ -19,9 +21,11 @@ class SessionManager {
 
 		Session*  getSessionBySocket(int clientSocket);
 
+		static void sendPacketFunc(int sessionIndex, std::string &res);
+
 	private:
 		std::map<int, int> _sessionIndexMap;
-		std::vector<Session*> _sessions;
+		static std::vector<Session*> _sessions;
 		std::deque<int> _sessionIndexPool;
 };
 

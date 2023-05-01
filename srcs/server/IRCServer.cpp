@@ -66,7 +66,7 @@ void IRCServer::process()
 {
 	for(std::deque<RecvPacketInfo>::iterator it = _packetQueue.begin(); it != _packetQueue.end(); ++it)
 	{
-		_packetManager.process(it->clientSocket, it->sessionIndex, it->message);
+		_packetManager.process(it->sessionIndex, it->message);
 		if (it->message._command == "DISCONNECT")
 		{
 			_sessionManager.unRegisterSession(it->sessionIndex);
@@ -75,8 +75,8 @@ void IRCServer::process()
 	_packetQueue.clear();
 }
 
-void IRCServer::addPacketFunc(int clientSocket, int sessionIndex, IRCMessage &message)
+void IRCServer::addPacketFunc(int sessionIndex, IRCMessage &message)
 {
-	RecvPacketInfo packetInfo = {clientSocket, sessionIndex, message};
+	RecvPacketInfo packetInfo = {sessionIndex, message};
 	_packetQueue.push_back(packetInfo);
 }
