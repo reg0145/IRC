@@ -17,7 +17,7 @@ class IRCServer
 		void init(int port, char *password);
 		void start();
 
-		static void addPacketFunc(int clientSocket, int sessionIndex, IRCMessage &req);
+		static void addPacketFunc(int clientSocket, int sessionIndex, IRCMessage &message);
 
 	private:
 		void onRequestHandler(int socket);
