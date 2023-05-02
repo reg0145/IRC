@@ -9,7 +9,8 @@ class Client {
 		Client(int sessionIndex);
 		~Client();
 
-		void leaveChannel(std::string chnannelName);
+		void addChannel(std::string channelName);
+		void removeChannel(std::string chnannelName);
 		void leaveClient();
 
 		int getSessionIndex() const;

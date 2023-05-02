@@ -18,6 +18,7 @@ class ClientManager {
 
 		bool checkNick(std::string nickname);
 		bool checkClient(int sessionIndex);
+		bool isJoinedChannel(int sessionIndex, std::string channelName);
 		void addClient(int sessionIndex, std::string nickname);
 		void removeClient(int sessionIndex);
 		

@@ -21,12 +21,47 @@ void Channel::removeClient(Client *client)
 
 	if (it != _clients.end())
 	{
-		it->second->leaveChannel(_channelName);
+		it->second->removeChannel(_channelName);
 		_clients.erase(nickname);
 	}
 }
 
-std::string Channel::getChannelName()
+void Channel::addOperator(std::string nickname)
+{
+	_operator.push_back(nickname);
+}
+
+void Channel::removeOperator(std::string nickname)
+{
+	_operator.remove(nickname);
+}
+
+bool Channel::isOperator(std::string nickname)
+{
+	std::list<std::string>::iterator it;
+	for (it = _operator.begin(); it != _operator.end(); it++)
+	{
+		if (*it == nickname)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+std::list<std::string> Channel::getClientsName()
+{
+	std::list<std::string> clientsName;
+
+	std::map<std::string, Client*>::iterator it;
+	for (it = _clients.begin(); it != _clients.end(); it++)
+	{
+		clientsName.push_back(it->first);
+	}
+	return clientsName;
+}
+
+std::string &Channel::getChannelName()
 {
 	return _channelName;
 }

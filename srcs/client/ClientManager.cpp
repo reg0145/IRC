@@ -43,6 +43,17 @@ bool ClientManager::checkClient(int sessionIndex)
 	return SUCCESS;
 }
 
+bool ClientManager::isJoinedChannel(int sessionIndex, std::string channelName)
+{
+	Client* client = getClient(sessionIndex);
+	
+	if (client->getChannel(channelName) != "")
+	{
+		return true;
+	}
+	return false;
+}
+
 void ClientManager::addClient(int sessionIndex, std::string nickname)
 {
 	_clients[nickname] = _clientPool[sessionIndex];
