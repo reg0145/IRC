@@ -66,6 +66,7 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
+	
 	if (req._parameters.size() != 1)
 	{
 		message._command = "461";
