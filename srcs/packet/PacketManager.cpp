@@ -184,7 +184,8 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	{
 		if (_channelManager.isValidChannelName(*itChannelName) == false)
 		{
-			message._command = "403 " + *itChannelName;
+			message._command = "403";
+			message._parameters.push_back(*itChannelName);
 			message._trailing = "No such channel";
 			std::string res = message.toString();
 			_sendPacketFunc(sessionIndex, res);
@@ -194,9 +195,12 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
+		message._parameters.clear();
 		if (_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
-			message._command = "443 " + client->getNickname() + " " + *itChannelName;
+			message._command = "443";
+			message._parameters.push_back(client->getNickname());
+			message._parameters.push_back(*itChannelName);
 			message._trailing = "is already on channel";
 			std::string res = message.toString();
 			_sendPacketFunc(sessionIndex, res);
@@ -207,7 +211,10 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			/* new Channel 실패(malloc 실패) 코드 */
 			return ;
 		}
-		message._command = "353 " + client->getNickname() + " = " + *itChannelName;
+		message._command = "353";
+		message._parameters.push_back(client->getNickname());
+		message._parameters.push_back("=");
+		message._parameters.push_back(*itChannelName);
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
 		broadcastChannel(*itChannelName, res);
