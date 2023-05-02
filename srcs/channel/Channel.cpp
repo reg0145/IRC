@@ -36,7 +36,7 @@ void Channel::removeOperator(std::string nickname)
 	_operator.remove(nickname);
 }
 
-bool Channel::checkIsOperator(std::string nickname)
+bool Channel::isOperator(std::string nickname)
 {
 	std::list<std::string>::iterator it;
 	for (it = _operator.begin(); it != _operator.end(); it++)

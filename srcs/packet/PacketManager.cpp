@@ -182,7 +182,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	std::list<std::string>::iterator itChannelName;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		if (_channelManager.checkChannelName(*itChannelName) == FAIL)
+		if (_channelManager.isValidChannelName(*itChannelName) == false)
 		{
 			message._command = "403 " + *itChannelName;
 			message._trailing = "No such channel";
@@ -194,7 +194,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		if (_clientManager.checkJoinedChannel(sessionIndex, *itChannelName))
+		if (_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
 			message._command = "443 " + client->getNickname() + " " + *itChannelName;
 			message._trailing = "is already on channel";

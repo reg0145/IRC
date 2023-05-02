@@ -38,7 +38,7 @@ int ChannelManager::leaveClient(std::string channelName, Client *client)
 	}
 
 	std::string nickname = client->getNickname();
-	if (channel->checkIsOperator(nickname))
+	if (channel->isOperator(nickname))
 	{
 		channel->removeOperator(nickname);
 	}
@@ -53,13 +53,13 @@ int ChannelManager::leaveClient(std::string channelName, Client *client)
 	return SUCCESS;
 }
 
-bool ChannelManager::checkChannelName(std::string channelName)
+bool ChannelManager::isValidChannelName(std::string channelName)
 {
-	if (channelName[0] != '#' && channelName[0] != '&')
+	if (channelName[0] == '#' || channelName[0] == '&')
 	{
-		return FAIL;
+		return true;
 	}
-	return SUCCESS;
+	return false;
 }
 
 int ChannelManager::addChannel(std::string channelName)
@@ -90,7 +90,7 @@ std::string ChannelManager::getChannelInfo(std::string channelName)
 	std::list<std::string>::iterator it;
 	for (it = clientsName.begin(); it != clientsName.end(); it++)
 	{
-		if (channel->checkIsOperator(*it))
+		if (channel->isOperator(*it))
 		{
 			channelInfo += "@" + *it + " ";
 		}

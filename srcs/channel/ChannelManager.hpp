@@ -13,7 +13,7 @@ class ChannelManager {
 
 		int enterClient(std::string channelName, Client *client);
 		int leaveClient(std::string channelName, Client *client);
-		bool checkChannelName(std::string channelName);
+		bool isValidChannelName(std::string channelName);
 		std::string getChannelInfo(std::string channelName);
 	
 		Channel* getChannel(std::string channelName);

@@ -43,7 +43,7 @@ bool ClientManager::checkClient(int sessionIndex)
 	return SUCCESS;
 }
 
-bool ClientManager::checkJoinedChannel(int sessionIndex, std::string channelName)
+bool ClientManager::isJoinedChannel(int sessionIndex, std::string channelName)
 {
 	Client* client = getClient(sessionIndex);
 	

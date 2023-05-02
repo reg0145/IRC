@@ -16,7 +16,7 @@ class Channel
 		void removeClient(Client *client);
 		void addOperator(std::string nickname);
 		void removeOperator(std::string nickname);
-		bool checkIsOperator(std::string nickname);
+		bool isOperator(std::string nickname);
 	
 		std::list<std::string> getClientsName();
 		std::string &getChannelName();
