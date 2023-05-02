@@ -62,6 +62,11 @@ bool Client::getIsPass() const
 	return _isPass;
 }
 
+void Client::setPassTrue()
+{
+	_isPass = true;
+}
+
 void	Client::setNickname(std::string nickname)
 {
 	_nickname = nickname;

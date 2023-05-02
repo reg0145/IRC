@@ -3,8 +3,9 @@
 
 void(*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 
-void PacketManager::init()
+void PacketManager::init(char *password)
 {
+	_password = password;
 	PacketManager::_sendPacketFunc = &SessionManager::sendPacketFunc;
 
 	_recvFuntionDictionary["DISCONNECT"] = &PacketManager::processDisconnect;
@@ -63,13 +64,32 @@ void PacketManager::processDisconnect(int sessionIndex, IRCMessage &req)
 
 void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 {
-	(void)sessionIndex;
-	(void)req;
 
 	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+	
+	if (req._parameters.size() != 1)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	if (req._parameters[0] != _password)
+	{
+		message._command = "464";
+		message._trailing = "Password incorrect!";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	
+	client->setPassTrue();
+
 	message._command = "001";
 	message._trailing = "process pass!";
-
 	std::string res = message.toString();
 	_sendPacketFunc(sessionIndex, res);
 }

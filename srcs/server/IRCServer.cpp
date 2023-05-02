@@ -4,14 +4,14 @@ std::deque<RecvPacketInfo> IRCServer::_packetQueue = std::deque<RecvPacketInfo>(
 
 void IRCServer::init(int port, char *password)
 {
-	(void)password;
+	
 	_serverSocket.bind(port);
 	_serverSocket.listen();
 
+	_packetManager.init(password);
 	_socketReactor.init(*this, &IRCServer::onRequestHandler, &IRCServer::onRequestErrorHandler);
 	_socketReactor.addSocket(_serverSocket.getSocket());
 
-	_packetManager.init();
 
 	Session::_addPacketFunc = &IRCServer::addPacketFunc;
 }

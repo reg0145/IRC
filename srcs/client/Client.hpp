@@ -17,6 +17,7 @@ class Client {
 		std::string getNickname() const;
 		std::string getChannel(std::string channelName);
 		bool getIsPass() const;
+		void setPassTrue();
 		void setNickname(std::string nickname);
 		void setName(std::string name);
 		void setHostname(std::string hostname);
