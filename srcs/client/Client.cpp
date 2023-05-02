@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int sessionIndex) 
+Client::Client(int sessionIndex)
 : _sessionIndex(sessionIndex),
   _name(""),
   _nickname(""),
@@ -24,6 +24,12 @@ void Client::leaveClient()
 	_isAdmin = false;
 	_channels.clear();
 }
+
+int Client::getSessionIndex() const
+{
+	return _sessionIndex;
+}
+
 
 std::string Client::getNickname() const
 {
