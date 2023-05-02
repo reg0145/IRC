@@ -2,6 +2,7 @@
 #define CHANNEL_HPP
 
 #include <map>
+#include <vector>
 #include <string>
 #include "../client/Client.hpp"
 
@@ -13,6 +14,8 @@ class Channel
 
 		void addClient(Client *client);
 		void removeClient(Client *client);
+		std::vector<std::string> getClientsName();
+		std::string getOperatorName();
 		std::string getChannelName();
 		int getClientCount();
 

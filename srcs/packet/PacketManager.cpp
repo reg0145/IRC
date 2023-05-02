@@ -12,6 +12,7 @@ void PacketManager::init()
 	_recvFuntionDictionary["PASS"] = &PacketManager::processPass;
 	_recvFuntionDictionary["USER"] = &PacketManager::processUser;
 	_recvFuntionDictionary["PING"] = &PacketManager::processPing;
+	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -118,8 +119,7 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	/* 파라미터 1개 이상 존재하는가?*/
-	if (req._parameters.size() != 3)
+	if (req._parameters.size() != 1)
 	{
 		//sendPacketFunc();
 		return ;
@@ -154,4 +154,73 @@ void PacketManager::processPing(int sessionIndex, IRCMessage &req)
 
 	std::string res = message.toString();
 	_sendPacketFunc(sessionIndex ,res);
+}
+
+void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	// if (_clientManager.checkClient(sessionIndex) == FAIL)
+	// {
+	// 	// sendPacketFunc();
+	// 	return ;
+	// }
+
+	/* 파라미터 1개 존재하는가?*/
+	if (req._parameters.size() != 1)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 채널명 유효성 확인 */
+	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::list<std::string>::iterator itChannelName;
+	std::cout << "channelNames.size() : " << channelNames.size() << "\n" << "firstName: " << *channelNames.begin() << std::endl; //
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		std::cout << "channelName : " << *itChannelName <<  "|" << std::endl; // 
+		if (_channelManager.checkChannelName(*itChannelName) == FAIL)
+		{
+			message._command = "403 " + *itChannelName;
+			message._trailing = "No such channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			return ;
+		}
+	}
+
+	/* 채널명 존재하는 지 확인 */
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		/* 이미 청취된 채널인지 확인 */
+		if (_clientManager.checkJoinedChannel(sessionIndex, *itChannelName) == FAIL)
+		{
+			message._command = "443 " + client->getNickname() + " " + *itChannelName;
+			message._trailing = "is already on channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			return ;
+		}
+		if (_channelManager.enterClient(*itChannelName, client) == FAIL)
+		{
+			/* new Channel 실패(malloc 실패) 코드 */
+			return ;
+		}
+	}
+
+	/* 요청 처리 성공! 방 정보 send */
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		message._command = "353 " + *itChannelName;
+		message._trailing = _channelManager.getChannelInfo(*itChannelName);
+		std::string res = message.toString();
+		std::cout << "!RES: " << res << std::endl; // 여기서 한 개만 보냄, 왜?
+		_sendPacketFunc(sessionIndex, res);
+	}
+		return ;
 }

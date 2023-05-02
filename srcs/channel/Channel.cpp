@@ -26,6 +26,23 @@ void Channel::removeClient(Client *client)
 	}
 }
 
+std::vector<std::string> Channel::getClientsName()
+{
+	std::vector<std::string> clientsName;
+
+	std::map<std::string, Client*>::iterator it;
+	for (it = _clients.begin(); it != _clients.end(); it++)
+	{
+		clientsName.push_back(it->first);
+	}
+	return clientsName;
+}
+
+std::string Channel::getOperatorName()
+{
+	return _operator;
+}
+
 std::string Channel::getChannelName()
 {
 	return _channelName;
