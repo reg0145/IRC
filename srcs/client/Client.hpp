@@ -9,6 +9,7 @@ class Client {
 		Client(int sessionIndex);
 		~Client();
 
+		void addChannel(std::string channelName);
 		void leaveChannel(std::string chnannelName);
 		void leaveClient();
 

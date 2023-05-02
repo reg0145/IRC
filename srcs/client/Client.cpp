@@ -15,6 +15,16 @@ Client::~Client()
 {
 }
 
+void Client::addChannel(std::string channelName)
+{
+	_channels.insert(channelName);
+}
+
+void Client::leaveChannel(std::string channelName)
+{
+	_channels.erase(channelName);
+}
+
 void Client::leaveClient()
 {
 	_name = "";
@@ -65,8 +75,4 @@ void	Client::setName(std::string name)
 void	Client::setHostname(std::string hostname)
 {
 	_hostname = hostname;
-}
-void Client::leaveChannel(std::string channelName)
-{
-	_channels.erase(channelName);
 }

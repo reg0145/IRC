@@ -49,9 +49,9 @@ bool ClientManager::checkJoinedChannel(int sessionIndex, std::string channelName
 	
 	if (client->getChannel(channelName) != "")
 	{
-		return FAIL;
+		return true;
 	}
-	return SUCCESS;
+	return false;
 }
 
 void ClientManager::addClient(int sessionIndex, std::string nickname)

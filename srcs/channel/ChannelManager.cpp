@@ -27,6 +27,8 @@ int ChannelManager::enterClient(std::string channelName, Client *client)
 		channel->addClient(client);
 	}
 
+	client->addChannel(channelName);
+
 	return SUCCESS;
 }
 
@@ -46,6 +48,7 @@ int ChannelManager::leaveClient(std::string channelName, Client *client)
 	}
 
 	channel->removeClient(client);
+	client->leaveChannel(channelName);
 
 	if (channel->getClientCount() == 0)
 	{
