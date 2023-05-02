@@ -216,7 +216,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	/* 요청 처리 성공! 방 정보 send */
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		message._command = "353 " + *itChannelName;
+		message._command = "353 " + client->getNickname() + " = " + *itChannelName;
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
 		std::cout << "!RES: " << res << std::endl; // 여기서 한 개만 보냄, 왜?
