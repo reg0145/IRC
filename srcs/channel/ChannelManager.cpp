@@ -48,7 +48,7 @@ int ChannelManager::leaveClient(std::string channelName, Client *client)
 	}
 
 	channel->removeClient(client);
-	client->leaveChannel(channelName);
+	client->removeChannel(channelName);
 
 	if (channel->getClientCount() == 0)
 	{

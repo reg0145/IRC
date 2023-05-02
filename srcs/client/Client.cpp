@@ -20,7 +20,7 @@ void Client::addChannel(std::string channelName)
 	_channels.insert(channelName);
 }
 
-void Client::leaveChannel(std::string channelName)
+void Client::removeChannel(std::string channelName)
 {
 	_channels.erase(channelName);
 }

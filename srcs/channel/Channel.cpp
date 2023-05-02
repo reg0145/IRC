@@ -21,7 +21,7 @@ void Channel::removeClient(Client *client)
 
 	if (it != _clients.end())
 	{
-		it->second->leaveChannel(_channelName);
+		it->second->removeChannel(_channelName);
 		_clients.erase(nickname);
 	}
 }
