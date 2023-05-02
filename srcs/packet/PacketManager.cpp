@@ -194,27 +194,22 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		if (_clientManager.checkJoinedChannel(sessionIndex, *itChannelName) == FAIL)
+		if (_clientManager.checkJoinedChannel(sessionIndex, *itChannelName))
 		{
 			message._command = "443 " + client->getNickname() + " " + *itChannelName;
 			message._trailing = "is already on channel";
 			std::string res = message.toString();
 			_sendPacketFunc(sessionIndex, res);
-			return ;
+			continue ;
 		}
 		if (_channelManager.enterClient(*itChannelName, client) == FAIL)
 		{
 			/* new Channel 실패(malloc 실패) 코드 */
 			return ;
 		}
-	}
-
-	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
-	{
 		message._command = "353 " + client->getNickname() + " = " + *itChannelName;
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
 		broadcastChannel(*itChannelName, res);
 	}
-		return ;
 }
