@@ -29,7 +29,7 @@ void PacketManager::process(int sessionIndex, IRCMessage &message)
 }
 
 /* 해당 채널에 브로드캐스트 */
-void PacketManager::braodcastChannel(const std::string &channelName, std::string &res)
+void PacketManager::broadcastChannel(const std::string &channelName, std::string &res)
 {
 	Channel *channel = _channelManager.getChannel(channelName);
 
@@ -50,7 +50,7 @@ void PacketManager::broadcastChannels(std::set<std::string> &channelNames, std::
 
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); ++itChannelName)
 	{
-		braodcastChannel(*itChannelName, res);
+		broadcastChannel(*itChannelName, res);
 	}
 }
 
@@ -214,7 +214,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		message._command = "353 " + client->getNickname() + " = " + *itChannelName;
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
-		braodcastChannel(*itChannelName, res);
+		broadcastChannel(*itChannelName, res);
 	}
 		return ;
 }
