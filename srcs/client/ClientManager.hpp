@@ -23,6 +23,7 @@ class ClientManager {
 		void removeClient(int sessionIndex);
 		
 		Client* getClient(int sessionIndex);
+		Client* getClientByNickname(std::string nickname);
 
 	private:
 		std::vector<Client*> _clientPool;

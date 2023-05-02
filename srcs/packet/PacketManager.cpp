@@ -14,6 +14,7 @@ void PacketManager::init(char *password)
 	_recvFuntionDictionary["USER"] = &PacketManager::processUser;
 	_recvFuntionDictionary["PING"] = &PacketManager::processPing;
 	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
+	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -238,5 +239,84 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
 		broadcastChannel(*itChannelName, res);
+	}
+}
+
+void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	std::string nickname = _clientManager.getClient(sessionIndex)->getNickname();
+
+	if (_clientManager.checkClient(sessionIndex) == FAIL)
+	{
+		return;
+	}
+	if (req._parameters.size() != 1)
+	{
+		message._command = "411";
+		message._trailing = "No recipient given (PRIVMSG)";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return;
+	}
+	if (req._trailing == "")
+	{
+		message._command = "412";
+		message._trailing = "No text to send";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return;
+	}
+	std::list<std::string> targets = IRCMessage::split(req._parameters[0], ",");
+	for (std::list<std::string>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+	{
+		memset(&message, 0, sizeof(IRCMessage));
+		if ((*it)[0] == '#')
+		{
+			Channel *channel = _channelManager.getChannel(*it);
+			if (!channel)
+			{
+				message._command = "401";
+				message._parameters.push_back(*it);
+				message._trailing = "No such nick/channel";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue;
+			}
+			if (!channel->isClientInChannel(nickname))
+			{
+				message._command = "404";
+				message._parameters.push_back(*it);
+				message._trailing = "Cannot send to channel";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue;
+			}
+			message._prefix = nickname;
+			message._command = "PRIVMSG";
+			message._parameters.push_back(*it);
+			message._trailing = req._trailing;
+			std::string res = message.toString();
+			broadcastChannel(channel->getChannelName(), res);
+		}
+		else
+		{
+			Client *client = _clientManager.getClientByNickname(*it);
+			if (!client)
+			{
+				message._command = "401";
+				message._parameters.push_back(*it);
+				message._trailing = "No such nick/channel";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue;
+			}
+			message._prefix = nickname;
+			message._command = "PRIVMSG";
+			message._parameters.push_back(*it);
+			message._trailing = req._trailing;
+			std::string res = message.toString();
+			_sendPacketFunc(client->getSessionIndex(), res);
+		}
 	}
 }
