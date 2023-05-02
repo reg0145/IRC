@@ -15,7 +15,9 @@ class PacketManager
 		void init();
 		void process(int sessionIndex, IRCMessage &req);
 
-		//void broadcastJoinChannels(int sessionIndex, IRCMessage &message);
+		void braodcastChannel(const std::string &channelName, std::string &res);
+		void broadcastChannels(std::set<std::string> &channelNames, std::string &res);
+
 		void processDisconnect(int sessionIndex, IRCMessage &req);
 		void processNick(int sessionIndex, IRCMessage &req);
 		void processPass(int sessionIndex, IRCMessage &req);

@@ -28,28 +28,31 @@ void PacketManager::process(int sessionIndex, IRCMessage &message)
 	(this->*(it->second))(sessionIndex, message);
 }
 
-//void PacketManager::broadcastJoinChannels(int sessionIndex, std::string &res)
-//{
-//	(void)res;
-//	Client *client = _clientManager.getClient(sessionIndex);
+/* 해당 채널에 브로드캐스트 */
+void PacketManager::braodcastChannel(const std::string &channelName, std::string &res)
+{
+	Channel *channel = _channelManager.getChannel(channelName);
 
-//	std::set<std::string>::iterator itChannelName;
-//	std::set<std::string> channels = client->getChannels();
+	std::map<std::string, Client*>::iterator itClient;
+	std::map<std::string, Client*> &clients = channel->getClients();
 
-//	for (itChannelName = channels.begin(); itChannelName != channels.end(); itChannelName++)
-//	{
-//		Channel *channel = _channelManager.getChannel(*itChannelName);
+	for (itClient = clients.begin(); itClient != clients.end(); ++itClient)
+	{
+		int sessionIndex = itClient->second->getSessionIndex();
+		_sendPacketFunc(sessionIndex, res);
+	}
+}
 
-//		std::map<std::string, Client*>::iterator itClient;
-//		std::map<std::string, Client*> clients = channel->getClients();
+/* 모든 채널에 브로드캐스트 */
+void PacketManager::broadcastChannels(std::set<std::string> &channelNames, std::string &res)
+{
+	std::set<std::string>::iterator itChannelName;
 
-//		for (itClient = clients.begin(); itClient != clients.end(); itClient++)
-//		{
-//			int sessionIndex = itClient->second->getSessionIndex();
-//			_sendPacketFunc(sessionIndex, res);
-//		}
-//	}
-//}
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); ++itChannelName)
+	{
+		braodcastChannel(*itChannelName, res);
+	}
+}
 
 void PacketManager::processDisconnect(int sessionIndex, IRCMessage &req)
 {

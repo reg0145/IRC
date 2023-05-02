@@ -22,6 +22,7 @@ class Channel
 		std::vector<std::string> getClientsName();
 		std::string &getChannelName();
 		int getClientCount();
+		std::map<std::string, Client*> &getClients();
 
 	private:
 		std::string _channelName;

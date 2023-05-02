@@ -70,3 +70,8 @@ int Channel::getClientCount()
 {
 	return _clients.size();
 }
+
+std::map<std::string, Client*> &Channel::getClients()
+{
+	return _clients;
+}
