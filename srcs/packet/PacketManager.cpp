@@ -3,9 +3,9 @@
 
 void(*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 
-void PacketManager::init(char *pw)
+void PacketManager::init(char *password)
 {
-	_password = pw;
+	_password = password;
 	PacketManager::_sendPacketFunc = &SessionManager::sendPacketFunc;
 
 	_recvFuntionDictionary["DISCONNECT"] = &PacketManager::processDisconnect;
