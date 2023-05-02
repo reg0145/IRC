@@ -12,7 +12,7 @@
 class PacketManager
 {
 	public:
-		void init();
+		void init(char *_password);
 		void process(int sessionIndex, IRCMessage &req);
 
 		void braodcastChannel(const std::string &channelName, std::string &res);
@@ -24,8 +24,11 @@ class PacketManager
 		void processUser(int sessionIndex, IRCMessage &req);
 		void processPing(int sessionIndex, IRCMessage &req);
 
+		bool getIsPass();
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 	private:
+		bool isPass;
+		char *_password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
 		typedef void(PacketManager::* PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
