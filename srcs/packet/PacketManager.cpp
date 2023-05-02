@@ -164,13 +164,11 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
 
-	// if (_clientManager.checkClient(sessionIndex) == FAIL)
-	// {
-	// 	// sendPacketFunc();
-	// 	return ;
-	// }
+	if (_clientManager.checkClient(sessionIndex) == FAIL)
+	{
+		return ;
+	}
 
-	/* 파라미터 1개 존재하는가?*/
 	if (req._parameters.size() != 1)
 	{
 		message._command = "461";
@@ -180,13 +178,10 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	/* 채널명 유효성 확인 */
 	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
 	std::list<std::string>::iterator itChannelName;
-	std::cout << "channelNames.size() : " << channelNames.size() << "\n" << "firstName: " << *channelNames.begin() << std::endl; //
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		std::cout << "channelName : " << *itChannelName <<  "|" << std::endl; // 
 		if (_channelManager.checkChannelName(*itChannelName) == FAIL)
 		{
 			message._command = "403 " + *itChannelName;
@@ -197,10 +192,8 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		}
 	}
 
-	/* 채널명 존재하는 지 확인 */
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		/* 이미 청취된 채널인지 확인 */
 		if (_clientManager.checkJoinedChannel(sessionIndex, *itChannelName) == FAIL)
 		{
 			message._command = "443 " + client->getNickname() + " " + *itChannelName;
@@ -216,14 +209,12 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		}
 	}
 
-	/* 요청 처리 성공! 방 정보 send */
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		message._command = "353 " + client->getNickname() + " = " + *itChannelName;
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
-		std::cout << "!RES: " << res << std::endl; // 여기서 한 개만 보냄, 왜?
-		_sendPacketFunc(sessionIndex, res);
+		braodcastChannel(*itChannelName, res);
 	}
 		return ;
 }
