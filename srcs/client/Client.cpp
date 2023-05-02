@@ -40,10 +40,19 @@ int Client::getSessionIndex() const
 	return _sessionIndex;
 }
 
+std::string Client::getName() const
+{
+	return _name;
+}
 
 std::string Client::getNickname() const
 {
 	return _nickname;
+}
+
+std::string Client::getHostname() const
+{
+	return _hostname;
 }
 
 std::string Client::getChannel(std::string channelName)

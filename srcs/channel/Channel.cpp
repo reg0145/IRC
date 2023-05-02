@@ -49,6 +49,17 @@ bool Channel::isOperator(std::string nickname)
 	return false;
 }
 
+bool Channel::isClientInChannel(std::string nickname)
+{
+	std::map<std::string, Client*>::iterator it = _clients.find(nickname);
+
+	if (it != _clients.end())
+	{
+		return true;
+	}
+	return false;
+}
+
 std::list<std::string> Channel::getClientsName()
 {
 	std::list<std::string> clientsName;

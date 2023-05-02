@@ -14,8 +14,11 @@ class Client {
 		void leaveClient();
 
 		int getSessionIndex() const;
+		std::string getName() const;
 		std::string getNickname() const;
+		std::string getHostname() const;
 		std::string getChannel(std::string channelName);
+
 		bool getIsPass() const;
 		void setPassTrue();
 		void setNickname(std::string nickname);

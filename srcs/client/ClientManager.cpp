@@ -74,3 +74,16 @@ Client* ClientManager::getClient(int sessionIndex)
 {
 	return _clientPool[sessionIndex];
 }
+
+Client* ClientManager::getClientByNickname(std::string nickname)
+{
+	std::map<std::string, Client*>::iterator it;
+	it = _clients.find(nickname);
+
+	if (it == _clients.end())
+	{
+		return NULL;
+	}
+
+	return it->second;
+}

@@ -20,6 +20,7 @@ class Channel
 	
 		std::list<std::string> getClientsName();
 		std::string &getChannelName();
+		bool isClientInChannel(std::string nickname);
 		int getClientCount();
 		std::map<std::string, Client*> &getClients();
 
