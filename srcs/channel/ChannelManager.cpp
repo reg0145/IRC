@@ -18,7 +18,7 @@ int ChannelManager::enterClient(std::string channelName, Client *client)
 		{
 			return FAIL;
 		}
-		Channel *channel = getChannel(channelName);
+		channel = getChannel(channelName);
 		channel->addOperator(client->getNickname());
 	}
 
