@@ -12,19 +12,21 @@ int ChannelManager::enterClient(std::string channelName, Client *client)
 {
 	Channel *channel = getChannel(channelName);
 
-	if (channel)
-	{
-		channel->addClient(client);
-	}
-	else
+	if (!channel)
 	{
 		if (addChannel(channelName) == FAIL)
 		{
 			return FAIL;
 		}
-		/* client를 operator로 추가하는 코드 추가 */
-		enterClient(channelName, client);
+		Channel *channel = getChannel(channelName);
+		channel->addOperator(client->getNickname());
+		channel->addClient(client);
 	}
+	else
+	{
+		channel->addClient(client);
+	}
+
 	return SUCCESS;
 }
 
@@ -35,6 +37,12 @@ int ChannelManager::leaveClient(std::string channelName, Client *client)
 	if (!channel)
 	{
 		return FAIL;
+	}
+
+	std::string nickname = client->getNickname();
+	if (channel->checkIsOperator(nickname))
+	{
+		channel->removeOperator(nickname);
 	}
 
 	channel->removeClient(client);
@@ -79,17 +87,18 @@ std::string ChannelManager::getChannelInfo(std::string channelName)
 	std::string channelInfo;
 	Channel *channel = getChannel(channelName);
 
-	std::string operatorName = channel->getOperatorName();
-	if (operatorName != "")
-	{
-		channelInfo += "@" + operatorName + " ";
-	}
-
 	std::vector<std::string> clientsName = channel->getClientsName();
 	std::vector<std::string>::iterator it;
 	for (it = clientsName.begin(); it != clientsName.end(); it++)
 	{
-		channelInfo += *it + " ";
+		if (channel->checkIsOperator(*it))
+		{
+			channelInfo += "@" + *it + " ";
+		}
+		else
+		{
+			channelInfo += *it + " ";
+		}
 	}
 
 	if (channelInfo.size() > 0)
