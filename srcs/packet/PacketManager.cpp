@@ -78,7 +78,7 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 	if (req._parameters[0] != _password)
 	{
 		message._command = "464";
-		message._trailing = "Password incorrect";
+		message._trailing = "Password incorrect!";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
 		return ;

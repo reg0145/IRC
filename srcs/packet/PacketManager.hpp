@@ -27,7 +27,6 @@ class PacketManager
 		bool getIsPass();
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 	private:
-		bool isPass;
 		char *_password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
