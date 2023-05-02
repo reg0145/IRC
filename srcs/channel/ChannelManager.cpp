@@ -90,8 +90,8 @@ std::string ChannelManager::getChannelInfo(std::string channelName)
 	std::string channelInfo;
 	Channel *channel = getChannel(channelName);
 
-	std::vector<std::string> clientsName = channel->getClientsName();
-	std::vector<std::string>::iterator it;
+	std::list<std::string> clientsName = channel->getClientsName();
+	std::list<std::string>::iterator it;
 	for (it = clientsName.begin(); it != clientsName.end(); it++)
 	{
 		if (channel->checkIsOperator(*it))

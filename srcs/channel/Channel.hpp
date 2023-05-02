@@ -3,7 +3,6 @@
 
 #include <map>
 #include <list>
-#include <vector>
 #include <string>
 #include "../client/Client.hpp"
 
@@ -19,7 +18,7 @@ class Channel
 		void removeOperator(std::string nickname);
 		bool checkIsOperator(std::string nickname);
 	
-		std::vector<std::string> getClientsName();
+		std::list<std::string> getClientsName();
 		std::string &getChannelName();
 		int getClientCount();
 		std::map<std::string, Client*> &getClients();

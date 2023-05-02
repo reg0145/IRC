@@ -49,9 +49,9 @@ bool Channel::checkIsOperator(std::string nickname)
 	return false;
 }
 
-std::vector<std::string> Channel::getClientsName()
+std::list<std::string> Channel::getClientsName()
 {
-	std::vector<std::string> clientsName;
+	std::list<std::string> clientsName;
 
 	std::map<std::string, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); it++)
