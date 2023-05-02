@@ -11,7 +11,8 @@ class Client {
 
 		void leaveChannel(std::string chnannelName);
 		void leaveClient();
-		
+
+		int getSessionIndex() const;
 		std::string getNickname() const;
 		std::string getChannel(std::string channelName);
 		bool getIsPass() const;

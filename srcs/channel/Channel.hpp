@@ -13,8 +13,10 @@ class Channel
 
 		void addClient(Client *client);
 		void removeClient(Client *client);
+
 		std::string getChannelName();
 		int getClientCount();
+		std::map<std::string, Client*> &getClients();
 
 	private:
 		std::string _channelName;
