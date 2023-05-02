@@ -66,19 +66,28 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
-	if (req._command == "PASS" && req._parameters[0] == _password)
+	if (req._parameters.size() != 1)
 	{
-		message._command = "001";
-		message._trailing = "process pass!";
-		client->setPassTrue();
-	} else if (req._command == "PASS" && req._parameters.size() != 1){
 		message._command = "461";
 		message._trailing = "Not enough parameters";
-	} else if (req._command == "PASS" && req._parameters[0] != _password){
-		message._command = "462";
-		message._trailing = "Password incorrect";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
 	}
 
+	if (req._parameters[0] != _password)
+	{
+		message._command = "464";
+		message._trailing = "Password incorrect";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	
+	client->setPassTrue();
+
+	message._command = "001";
+	message._trailing = "process pass!";
 	std::string res = message.toString();
 	_sendPacketFunc(sessionIndex, res);
 }
