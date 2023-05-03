@@ -16,6 +16,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
+	_recvFuntionDictionary["OPER"] = &PacketManager::processOper;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -447,4 +448,11 @@ void PacketManager::processNotice(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(client->getSessionIndex(), res);
 		}
 	}
+}
+
+void PacketManager::processOper(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
 }
