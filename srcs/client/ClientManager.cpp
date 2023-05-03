@@ -50,7 +50,7 @@ bool ClientManager::isValidNickname(std::string nickname)
 		return false;
 	}
 
-	for (std::string::size_type i = 0; i < nickname.length(); ++i)
+	for (std::string::size_type i = 0; i < nickname.length(); i++)
 	{
 		if (!std::isalnum(nickname[i]))
 		{
