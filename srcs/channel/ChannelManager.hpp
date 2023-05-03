@@ -15,7 +15,7 @@ class ChannelManager
 		int enterClient(std::string channelName, Client* client);
 		int leaveClient(std::string channelName, Client* client);
 		bool isValidChannelName(std::string channelName);
-		void changeNickname(Client* clien, std::string oldNickname, std::string newNicknamet);
+		void changeNickname(Client* client, std::string oldNickname, std::string newNickname);
 		std::string getChannelInfo(std::string channelName);
 
 		Channel* getChannel(std::string channelName);
