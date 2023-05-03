@@ -139,6 +139,7 @@ void PacketManager::processNick(int sessionIndex, IRCMessage &req)
 	if (!_clientManager.isValidNickname(newNickname))
 	{
 		message._command = "432";
+		message._parameters.push_back(newNickname);
 		message._trailing = "Erroneous nickname";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
