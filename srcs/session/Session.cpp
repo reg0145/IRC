@@ -46,10 +46,9 @@ void Session::onReadable()
 void Session::close()
 {
 	IRCMessage message;
-	message._command = "DISCONNECT";
-	_messages.push_back(message);
+	message._command = "QUIT";
 
-	_addPacketFunc(_sessionIndex, _messages.front());
+	_addPacketFunc(_sessionIndex, message);
 }
 
 int Session::getClientSocket()

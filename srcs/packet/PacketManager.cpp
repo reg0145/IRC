@@ -16,6 +16,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
+	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -228,6 +229,10 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 	client->setHostname(req._parameters[1]);
 	client->setServername(req._parameters[2]);
 	client->setName(req._trailing);
+	std::cout << client->getUsername() << std::endl;
+	std::cout << client->getHostname() << std::endl;
+	std::cout << client->getServername() << std::endl;
+	std::cout << client->getName() << std::endl;
 }
 
 void PacketManager::processPing(int sessionIndex, IRCMessage &req)
@@ -440,4 +445,30 @@ void PacketManager::processNotice(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(client->getSessionIndex(), res);
 		}
 	}
+}
+
+void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
+{
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	/* 가입된 채널의 유저들에게 QUIT 알림 */
+	std::set<std::string>::iterator itChannelName;
+	std::set<std::string> channelNames = client->getChannels();
+
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		_channelManager.leaveClient(*itChannelName, client);
+		message._prefix = client->getNickname() + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "QUIT";
+		message._trailing = req._trailing;
+		std::string res = message.toString();
+		broadcastChannel(*itChannelName, res);
+	}
+	_clientManager.removeClient(sessionIndex);
 }
