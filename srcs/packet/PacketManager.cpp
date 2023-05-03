@@ -197,7 +197,7 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
 
-	if (_clientManager.checkClient(sessionIndex))
+	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		//sendPacketFunc();
 		return ;
@@ -243,7 +243,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
 
-	if (_clientManager.checkClient(sessionIndex))
+	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return ;
 	}
@@ -305,7 +305,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	std::string nickname = _clientManager.getClient(sessionIndex)->getNickname();
 
-	if (_clientManager.checkClient(sessionIndex) == FAIL)
+	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return;
 	}

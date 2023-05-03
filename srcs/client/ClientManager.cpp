@@ -20,16 +20,16 @@ ClientManager::~ClientManager()
 {
 }
 
-bool ClientManager::checkClient(int sessionIndex)
+bool ClientManager::isUnRegistedClient(int sessionIndex)
 {
 	Client* client = getClient(sessionIndex);
 
 	if (client->getNickname() == "" || !client->getIsPass())
 	{
-		return FAIL;
+		return true;
 	}
 
-	return SUCCESS;
+	return false;
 }
 
 bool ClientManager::isFailedPass(int sessionIndex)
