@@ -2,11 +2,11 @@
 #include <iostream>
 
 void (*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
+void (*PacketManager::_addDisConnectPacketFunc)(int sessionIndex) = 0;
 
 void PacketManager::init(char* password)
 {
 	_password = password;
-	PacketManager::_sendPacketFunc = &SessionManager::sendPacketFunc;
 
 	_recvFuntionDictionary["DISCONNECT"] = &PacketManager::processDisconnect;
 	_recvFuntionDictionary["NICK"] = &PacketManager::processNick;
@@ -470,5 +470,6 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 		std::string res = message.toString();
 		broadcastChannel(*itChannelName, res);
 	}
-	_clientManager.removeClient(sessionIndex);
+
+	_addDisConnectPacketFunc(sessionIndex);
 }

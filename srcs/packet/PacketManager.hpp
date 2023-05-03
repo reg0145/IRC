@@ -7,7 +7,6 @@
 #include "../message/IRCMessage.hpp"
 #include "../channel/ChannelManager.hpp"
 #include "../client/ClientManager.hpp"
-#include "../session/SessionManager.hpp"
 
 class PacketManager
 {
@@ -30,6 +29,7 @@ class PacketManager
 		void processQuit(int sessionIndex, IRCMessage &req);
 
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
+		static void(*_addDisConnectPacketFunc)(int sessionIndex);
 
 	private:
 		char* _password;

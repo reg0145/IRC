@@ -1,6 +1,6 @@
 #include "Session.hpp"
 
-void (*Session::_addPacketFunc)(int, IRCMessage) = 0;
+void (*Session::_addPacketFunc)(int sessionIndex, IRCMessage message) = 0;
 
 Session::Session(int sessionIndex, int clientSocket) : _sessionIndex(sessionIndex), _clientSocket(clientSocket)
 {
