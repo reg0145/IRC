@@ -8,9 +8,9 @@ ChannelManager::~ChannelManager()
 {
 }
 
-int ChannelManager::enterClient(std::string channelName, Client *client)
+int ChannelManager::enterClient(std::string channelName, Client* client)
 {
-	Channel *channel = getChannel(channelName);
+	Channel* channel = getChannel(channelName);
 
 	if (!channel)
 	{
@@ -28,9 +28,9 @@ int ChannelManager::enterClient(std::string channelName, Client *client)
 	return SUCCESS;
 }
 
-int ChannelManager::leaveClient(std::string channelName, Client *client)
+int ChannelManager::leaveClient(std::string channelName, Client* client)
 {
-	Channel *channel = getChannel(client->getChannel(channelName));
+	Channel* channel = getChannel(client->getChannel(channelName));
 
 	if (!channel)
 	{
@@ -62,14 +62,14 @@ bool ChannelManager::isValidChannelName(std::string channelName)
 	return false;
 }
 
-void ChannelManager::changeNickname(Client *client, std::string oldNickname, std::string newNickname)
+void ChannelManager::changeNickname(Client* client, std::string oldNickname, std::string newNickname)
 {
 	std::set<std::string>::iterator itChannelName;
 	std::set<std::string> channels = client->getChannels();
 
 	for (itChannelName = channels.begin(); itChannelName != channels.end(); itChannelName++)
 	{
-		Channel *channel = getChannel(*itChannelName);
+		Channel* channel = getChannel(*itChannelName);
 		if (channel)
 		{
 			channel->removeOperator(oldNickname);
@@ -93,7 +93,7 @@ int ChannelManager::addChannel(std::string channelName)
 	return SUCCESS;
 }
 
-void ChannelManager::removeChannel(Channel *channel)
+void ChannelManager::removeChannel(Channel* channel)
 {
 	_channels.erase(channel->getChannelName());
 	delete channel;
@@ -102,7 +102,7 @@ void ChannelManager::removeChannel(Channel *channel)
 std::string ChannelManager::getChannelInfo(std::string channelName)
 {
 	std::string channelInfo;
-	Channel *channel = getChannel(channelName);
+	Channel* channel = getChannel(channelName);
 
 	std::list<std::string> clientsName = channel->getClientsName();
 	std::list<std::string>::iterator it;

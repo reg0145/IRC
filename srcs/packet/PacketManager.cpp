@@ -3,7 +3,7 @@
 
 void (*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 
-void PacketManager::init(char *password)
+void PacketManager::init(char* password)
 {
 	_password = password;
 	PacketManager::_sendPacketFunc = &SessionManager::sendPacketFunc;
@@ -359,7 +359,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 		}
 		else
 		{
-			Client *client = _clientManager.getClientByNickname(*it);
+			Client* client = _clientManager.getClientByNickname(*it);
 			if (!client)
 			{
 				message._command = "401";
