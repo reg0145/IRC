@@ -90,6 +90,15 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
 
+	if (client->getIsPass() == true)
+	{
+		message._command = "462";
+		message._trailing = "You may not reregister";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	
 	if (req._parameters.size() != 1)
 	{
 		message._command = "461";
