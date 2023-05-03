@@ -176,20 +176,17 @@ void PacketManager::processNick(int sessionIndex, IRCMessage &req)
 	_channelManager.changeNickname(client, oldNickname, newNickname);
 
 	/* - 가입된 채널의 유저들에게 NICK 변경 알림 */
-	std::set<std::string> joinedChannelNames = client->getChannels();
-	if (joinedChannelNames.size() > 0)
-	{
-		message._prefix = oldNickname + "!~b@" + client->getServername();
-		message._command = "NICK";
-		message._trailing = newNickname;
-		std::string res = message.toString();
-		broadcastChannelsWithoutMe(sessionIndex, joinedChannelNames, res);
-	}
-
 	message._prefix = oldNickname + "!~b@" + client->getServername();
 	message._command = "NICK";
 	message._trailing = newNickname;
 	std::string res = message.toString();
+
+	std::set<std::string> joinedChannelNames = client->getChannels();
+	if (joinedChannelNames.size() > 0)
+	{
+		broadcastChannelsWithoutMe(sessionIndex, joinedChannelNames, res);
+	}
+
 	_sendPacketFunc(sessionIndex, res);
 }
 
