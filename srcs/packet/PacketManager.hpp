@@ -12,7 +12,7 @@
 class PacketManager
 {
 	public:
-		void init(char *_password);
+		void init(char* _password);
 		void process(int sessionIndex, IRCMessage &req);
 
 		void broadcastChannel(const std::string &channelName, std::string &res);
@@ -30,7 +30,7 @@ class PacketManager
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 
 	private:
-		char *_password;
+		char* _password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
 		typedef void(PacketManager::* PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);

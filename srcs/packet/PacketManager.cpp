@@ -66,7 +66,7 @@ void PacketManager::broadcastChannelsWithoutMe(int sessionIndex, const std::set<
 
 		std::map<std::string, Client*>::iterator itClient;
 		std::map<std::string, Client*> &clients = channel->getClients();
-		for (itClient = clients.begin(); itClient != clients.end(); ++itClient)
+		for (itClient = clients.begin(); itClient != clients.end(); itClient++)
 		{
 			int clientSessionIndex = itClient->second->getSessionIndex();
 			if (sessionIndex != clientSessionIndex)
@@ -331,7 +331,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 		memset(&message, 0, sizeof(IRCMessage));
 		if ((*it)[0] == '#')
 		{
-			Channel *channel = _channelManager.getChannel(*it);
+			Channel* channel = _channelManager.getChannel(*it);
 			if (!channel)
 			{
 				message._command = "401";

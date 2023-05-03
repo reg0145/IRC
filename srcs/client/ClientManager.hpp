@@ -29,8 +29,8 @@ class ClientManager
 		Client* getClientByNickname(std::string nickname);
 
 	private:
-		std::vector<Client *> _clientPool;
-		std::map<std::string, Client *> _clients;
+		std::vector<Client*> _clientPool;
+		std::map<std::string, Client*> _clients;
 };
 
 #endif

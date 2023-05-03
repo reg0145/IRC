@@ -12,10 +12,10 @@ class ChannelManager
 		ChannelManager();
 		~ChannelManager();
 
-		int enterClient(std::string channelName, Client *client);
-		int leaveClient(std::string channelName, Client *client);
+		int enterClient(std::string channelName, Client* client);
+		int leaveClient(std::string channelName, Client* client);
 		bool isValidChannelName(std::string channelName);
-		void changeNickname(Client *clien, std::string oldNickname, std::string newNicknamet);
+		void changeNickname(Client* clien, std::string oldNickname, std::string newNicknamet);
 		std::string getChannelInfo(std::string channelName);
 
 		Channel* getChannel(std::string channelName);
@@ -23,7 +23,7 @@ class ChannelManager
 	private:
 		std::map<std::string, Channel*> _channels;
 		int addChannel(std::string channelName);
-		void removeChannel(Channel *channel);
+		void removeChannel(Channel* channel);
 };
 
 #endif
