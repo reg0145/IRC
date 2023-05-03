@@ -14,6 +14,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["USER"] = &PacketManager::processUser;
 	_recvFuntionDictionary["PING"] = &PacketManager::processPing;
 	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
+	_recvFuntionDictionary["PART"] = &PacketManager::processPart;
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 }
 
@@ -293,6 +294,68 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		message._parameters.push_back(*itChannelName);
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
+		broadcastChannel(*itChannelName, res);
+	}
+}
+
+void PacketManager::processPart(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+
+	if (req._parameters.size() != 1)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::list<std::string>::iterator itChannelName;
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		memset(&message, 0, sizeof(IRCMessage));
+		if (!_channelManager.isValidChannelName(*itChannelName))
+		{
+			message._command = "403";
+			message._parameters.push_back(*itChannelName);
+			message._trailing = "No such channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
+		{
+			message._command = "442";
+			message._parameters.push_back(*itChannelName);
+			message._trailing = "You're not on that channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+		if (_channelManager.leaveClient(*itChannelName, client) == FAIL)
+		{
+			message._command = "403";
+			message._parameters.push_back(*itChannelName);
+			message._trailing = "No such channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+		message._command = "PART";
+		message._parameters.push_back(client->getNickname());
+		message._parameters.push_back("=");
+		message._parameters.push_back(*itChannelName);
+		message._trailing = "Part";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
 		broadcastChannel(*itChannelName, res);
 	}
 }
