@@ -80,17 +80,9 @@ void PacketManager::broadcastChannelsWithoutMe(int sessionIndex, const std::set<
 	{
 		Channel *channel = _channelManager.getChannel(*itChannelName);
 
-		std::map<std::string, Client*>::iterator itClient;
-		std::map<std::string, Client*> &clients = channel->getClients();
-		for (itClient = clients.begin(); itClient != clients.end(); itClient++)
-		{
-			int clientSessionIndex = itClient->second->getSessionIndex();
-			if (sessionIndex != clientSessionIndex)
-			{
-				_sendPacketFunc(clientSessionIndex, res);
-			}
-		}
+		broadcastChannelWithoutMe(sessionIndex, channel, res);
 	}
+
 }
 
 void PacketManager::processDisconnect(int sessionIndex, IRCMessage &req)
