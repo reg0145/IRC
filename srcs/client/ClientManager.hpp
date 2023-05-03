@@ -12,25 +12,25 @@
 
 class ClientManager
 {
-public:
-	ClientManager();
-	~ClientManager();
+	public:
+		ClientManager();
+		~ClientManager();
 
-	bool checkClient(int sessionIndex);
-	bool isFailedPass(int sessionIndex);
-	bool isValidNickname(std::string nickname);
-	bool isUsedNickname(std::string nickname);
-	bool isJoinedChannel(int sessionIndex, std::string channelName);
-	void changeNickname(int sessionIndex, std::string oldNickname, std::string newNickname);
-	void addClient(int sessionIndex, std::string nickname);
-	void removeClient(int sessionIndex);
+		bool checkClient(int sessionIndex);
+		bool isFailedPass(int sessionIndex);
+		bool isValidNickname(std::string nickname);
+		bool isUsedNickname(std::string nickname);
+		bool isJoinedChannel(int sessionIndex, std::string channelName);
+		void changeNickname(int sessionIndex, std::string oldNickname, std::string newNickname);
+		void addClient(int sessionIndex, std::string nickname);
+		void removeClient(int sessionIndex);
 
-	Client* getClient(int sessionIndex);
-	Client* getClientByNickname(std::string nickname);
+		Client* getClient(int sessionIndex);
+		Client* getClientByNickname(std::string nickname);
 
-private:
-	std::vector<Client *> _clientPool;
-	std::map<std::string, Client *> _clients;
+	private:
+		std::vector<Client *> _clientPool;
+		std::map<std::string, Client *> _clients;
 };
 
 #endif

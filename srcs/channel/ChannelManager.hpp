@@ -6,7 +6,8 @@
 #include "Channel.hpp"
 #include "../packet/PacketCode.hpp"
 
-class ChannelManager {
+class ChannelManager
+{
 	public:
 		ChannelManager();
 		~ChannelManager();
