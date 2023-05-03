@@ -36,6 +36,11 @@ void PacketManager::broadcastChannel(const std::string &channelName, std::string
 {
 	Channel *channel = _channelManager.getChannel(channelName);
 
+	if (!channel)
+	{
+		return ;
+	}
+
 	std::map<std::string, Client*>::iterator itClient;
 	std::map<std::string, Client*> &clients = channel->getClients();
 
@@ -355,6 +360,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 		message._parameters.push_back(*itChannelName);
 		message._trailing = "Part";
 		std::string res = message.toString();
+	
 		_sendPacketFunc(sessionIndex, res);
 		broadcastChannel(*itChannelName, res);
 	}
