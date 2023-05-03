@@ -323,6 +323,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 	}
 
 	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::string nickname = client->getNickname();
 	std::list<std::string>::iterator itChannelName;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
@@ -330,6 +331,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 		if (!_channelManager.isValidChannelName(*itChannelName))
 		{
 			message._command = "403";
+			message._parameters.push_back(nickname);
 			message._parameters.push_back(*itChannelName);
 			message._trailing = "No such channel";
 			std::string res = message.toString();
@@ -339,6 +341,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
 			message._command = "442";
+			message._parameters.push_back(nickname);
 			message._parameters.push_back(*itChannelName);
 			message._trailing = "You're not on that channel";
 			std::string res = message.toString();
@@ -348,19 +351,20 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 		if (_channelManager.leaveClient(*itChannelName, client) == FAIL)
 		{
 			message._command = "403";
+			message._parameters.push_back(nickname);
 			message._parameters.push_back(*itChannelName);
 			message._trailing = "No such channel";
 			std::string res = message.toString();
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
+
+		message._prefix = nickname + "!" + nickname + "@" + client->getServername();
 		message._command = "PART";
-		message._parameters.push_back(client->getNickname());
-		message._parameters.push_back("=");
 		message._parameters.push_back(*itChannelName);
-		message._trailing = "Part";
+		message._trailing = req._trailing;
 		std::string res = message.toString();
-	
+
 		_sendPacketFunc(sessionIndex, res);
 		broadcastChannel(*itChannelName, res);
 	}
