@@ -62,6 +62,24 @@ bool ChannelManager::isValidChannelName(std::string channelName)
 	return false;
 }
 
+void ChannelManager::changeNickname(Client *client, std::string oldNickname, std::string newNickname)
+{
+	std::set<std::string>::iterator itChannelName;
+	std::set<std::string> channels = client->getChannels();
+
+	for (itChannelName = channels.begin(); itChannelName != channels.end(); itChannelName++)
+	{
+		Channel *channel = getChannel(*itChannelName);
+		if (channel)
+		{
+			channel->removeOperator(oldNickname);
+			channel->addOperator(newNickname);
+			channel->removeClientByNickname(oldNickname);
+			channel->addClient(client);
+		}
+	}
+}
+
 int ChannelManager::addChannel(std::string channelName)
 {
 	Channel* channel = new(std::nothrow) Channel(channelName);
@@ -104,7 +122,7 @@ std::string ChannelManager::getChannelInfo(std::string channelName)
 	{
 		channelInfo.pop_back();
 	}
-	
+
 	return channelInfo;
 }
 

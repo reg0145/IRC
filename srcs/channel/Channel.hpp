@@ -14,10 +14,11 @@ class Channel
 
 		void addClient(Client *client);
 		void removeClient(Client *client);
+		void removeClientByNickname(std::string nickname);
 		void addOperator(std::string nickname);
 		void removeOperator(std::string nickname);
 		bool isOperator(std::string nickname);
-	
+
 		std::list<std::string> getClientsName();
 		std::string &getChannelName();
 		bool isClientInChannel(std::string nickname);

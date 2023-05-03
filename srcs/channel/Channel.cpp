@@ -21,7 +21,16 @@ void Channel::removeClient(Client *client)
 
 	if (it != _clients.end())
 	{
-		it->second->removeChannel(_channelName);
+		_clients.erase(nickname);
+	}
+}
+
+void Channel::removeClientByNickname(std::string nickname)
+{
+	std::map<std::string, Client*>::iterator it = _clients.find(nickname);
+
+	if (it != _clients.end())
+	{
 		_clients.erase(nickname);
 	}
 }
