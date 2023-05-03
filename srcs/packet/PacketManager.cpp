@@ -106,7 +106,7 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	
+
 	if (req._parameters.size() != 1)
 	{
 		message._command = "461";
@@ -218,13 +218,6 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 	}
 
 	if (req._parameters.size() != 3)
-	{
-		//sendPacketFunc();
-		return ;
-	}
-
-	std::string &nickname = req._parameters[0];
-	if (_clientManager.isUsedNickname(nickname))
 	{
 		//sendPacketFunc();
 		return ;
