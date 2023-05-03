@@ -12,12 +12,12 @@
 class PacketManager
 {
 	public:
-		void init(char *_password);
+		void init(char* _password);
 		void process(int sessionIndex, IRCMessage &req);
 
 		void broadcastChannel(const std::string &channelName, std::string &res);
-		void broadcastChannels(std::set<std::string> &channelNames, std::string &res);
-
+		void broadcastChannels(const std::set<std::string> &channelNames, std::string &res);
+		void broadcastChannelsWithoutMe(int sessionIndex, const std::set<std::string> &channelNames, std::string &res);
 		void processDisconnect(int sessionIndex, IRCMessage &req);
 		void processNick(int sessionIndex, IRCMessage &req);
 		void processPass(int sessionIndex, IRCMessage &req);
@@ -26,13 +26,13 @@ class PacketManager
 		void processJoin(int sessionIndex, IRCMessage &req);
 		void processPrivmsg(int sessionIndex, IRCMessage &req);
 
-		bool getIsPass();
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
+
 	private:
-		char *_password;
+		char* _password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
-		typedef void(PacketManager::* PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
+		typedef void(PacketManager::*PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
 
 		std::map<std::string, PROCESS_RECV_PACKET_FUNCTION> _recvFuntionDictionary;
 };

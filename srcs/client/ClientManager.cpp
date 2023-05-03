@@ -4,14 +4,14 @@ ClientManager::ClientManager()
 {
 	for (int i = 0; i < 1024; ++i)
 	{
-		Client* client = new(std::nothrow) Client(i);
-		
+		Client* client = new (std::nothrow) Client(i);
+
 		if (!client)
 		{
 			std::cerr << "ClientManager() : " << errno << std::endl;
 			exit(EXIT_FAILURE);
 		}
-		
+
 		_clientPool.push_back(client);
 	}
 }
@@ -20,38 +20,78 @@ ClientManager::~ClientManager()
 {
 }
 
-bool ClientManager::checkNick(std::string nickname)
+bool ClientManager::isUnRegistedClient(int sessionIndex)
 {
-	std::map<std::string, Client*>::iterator it = _clients.find(nickname);
-	
-	if (it != _clients.end())
-	{
-		return FAIL;
-	}
-	return SUCCESS;
-}
-
-bool ClientManager::checkClient(int sessionIndex)
-{	
 	Client* client = getClient(sessionIndex);
-	
+
 	if (client->getNickname() == "" || !client->getIsPass())
 	{
-		return FAIL;
+		return true;
 	}
 
-	return SUCCESS;
+	return false;
+}
+
+bool ClientManager::isFailedPass(int sessionIndex)
+{
+	Client* client = getClient(sessionIndex);
+
+	if (client->getIsPass())
+	{
+		return false;
+	}
+	return true;
+}
+
+bool ClientManager::isValidNickname(std::string nickname)
+{
+	if (nickname.length() > 9)
+	{
+		return false;
+	}
+
+	for (std::string::size_type i = 0; i < nickname.length(); i++)
+	{
+		if (!std::isalnum(nickname[i]))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool ClientManager::isUsedNickname(std::string nickname)
+{
+	std::map<std::string, Client*>::iterator it = _clients.find(nickname);
+
+	if (it == _clients.end())
+	{
+		return false;
+	}
+	return true;
 }
 
 bool ClientManager::isJoinedChannel(int sessionIndex, std::string channelName)
 {
 	Client* client = getClient(sessionIndex);
-	
+
 	if (client->getChannel(channelName) != "")
 	{
 		return true;
 	}
 	return false;
+}
+
+void ClientManager::changeNickname(int sessionIndex, std::string oldNickname, std::string newNickname)
+{
+	if (oldNickname != "")
+	{
+		_clients.erase(oldNickname);
+	}
+
+	addClient(sessionIndex, newNickname);
+	_clients[newNickname]->setNickname(newNickname);
 }
 
 void ClientManager::addClient(int sessionIndex, std::string nickname)
@@ -61,7 +101,7 @@ void ClientManager::addClient(int sessionIndex, std::string nickname)
 
 void ClientManager::removeClient(int sessionIndex)
 {
-	Client *client = getClient(sessionIndex);
+	Client* client = getClient(sessionIndex);
 
 	if (client)
 	{

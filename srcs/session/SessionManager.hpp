@@ -8,7 +8,8 @@
 
 class Session;
 
-class SessionManager {
+class SessionManager
+{
 	public:
 		SessionManager();
 

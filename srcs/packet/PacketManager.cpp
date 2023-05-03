@@ -1,9 +1,9 @@
 #include "PacketManager.hpp"
 #include <iostream>
 
-void(*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
+void (*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 
-void PacketManager::init(char *password)
+void PacketManager::init(char* password)
 {
 	_password = password;
 	PacketManager::_sendPacketFunc = &SessionManager::sendPacketFunc;
@@ -38,7 +38,7 @@ void PacketManager::broadcastChannel(const std::string &channelName, std::string
 	std::map<std::string, Client*>::iterator itClient;
 	std::map<std::string, Client*> &clients = channel->getClients();
 
-	for (itClient = clients.begin(); itClient != clients.end(); ++itClient)
+	for (itClient = clients.begin(); itClient != clients.end(); itClient++)
 	{
 		int sessionIndex = itClient->second->getSessionIndex();
 		_sendPacketFunc(sessionIndex, res);
@@ -46,13 +46,34 @@ void PacketManager::broadcastChannel(const std::string &channelName, std::string
 }
 
 /* 모든 채널에 브로드캐스트 */
-void PacketManager::broadcastChannels(std::set<std::string> &channelNames, std::string &res)
+void PacketManager::broadcastChannels(const std::set<std::string> &channelNames, std::string &res)
 {
 	std::set<std::string>::iterator itChannelName;
 
-	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); ++itChannelName)
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		broadcastChannel(*itChannelName, res);
+	}
+}
+
+void PacketManager::broadcastChannelsWithoutMe(int sessionIndex, const std::set<std::string> &channelNames, std::string &res)
+{
+	std::set<std::string>::iterator itChannelName;
+
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		Channel *channel = _channelManager.getChannel(*itChannelName);
+
+		std::map<std::string, Client*>::iterator itClient;
+		std::map<std::string, Client*> &clients = channel->getClients();
+		for (itClient = clients.begin(); itClient != clients.end(); itClient++)
+		{
+			int clientSessionIndex = itClient->second->getSessionIndex();
+			if (sessionIndex != clientSessionIndex)
+			{
+				_sendPacketFunc(clientSessionIndex, res);
+			}
+		}
 	}
 }
 
@@ -68,7 +89,7 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
-	
+
 	if (req._parameters.size() != 1)
 	{
 		message._command = "461";
@@ -86,28 +107,22 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	
-	client->setPassTrue();
 
-	message._command = "001";
-	message._trailing = "process pass!";
-	std::string res = message.toString();
-	_sendPacketFunc(sessionIndex, res);
+	client->setPassTrue();
 }
 
 void PacketManager::processNick(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
-	Client* client = _clientManager.getClient(sessionIndex);
 
-//	if (!client->getIsPass())
-//	{
-//		message._command = "451";
-//		message._trailing = "You have not registered";
-//		std::string res = message.toString();
-//		send(clientSocket, res.c_str(), res.size(), 0);
-//		return ;
-//	}
+	if (_clientManager.isFailedPass(sessionIndex))
+	{
+		message._command = "ERROR";
+		message._trailing = "Authentication failed";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
 
 	/* 파라미터 1개 이상 존재하는가?*/
 	if (req._parameters.size() != 1)
@@ -119,50 +134,90 @@ void PacketManager::processNick(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	/* 닉네임 중복여부 확인 */
-	std::string &nickname = req._parameters[0];
-	if (_clientManager.checkNick(nickname))
+	/* 닉네임 유효성 검사 */
+	std::string &newNickname = req._parameters[0];
+	if (!_clientManager.isValidNickname(newNickname))
 	{
-		message._command = "433";
-		message._trailing = "Nickname is already in use";
+		message._command = "432";
+		message._parameters.push_back(newNickname);
+		message._trailing = "Erroneous nickname";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
 
-	client->setNickname(nickname);
+	/* 닉네임 중복여부 확인 */
+	if (_clientManager.isUsedNickname(newNickname))
+	{
+		message._command = "433";
+		message._parameters.push_back(newNickname);
+		message._trailing = newNickname;
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
 
-	_clientManager.addClient(sessionIndex, nickname);
+	/* 닉네임 처음 등록된 경우 */
+	Client* client = _clientManager.getClient(sessionIndex);
+	std::string oldNickname = client->getNickname();
+	if (oldNickname == "")
+	{
+		_clientManager.changeNickname(sessionIndex, oldNickname, newNickname);
+		message._command = "001";
+		message._parameters.push_back(newNickname);
+		message._trailing = "Welcome to the Internet Relay Network, " + newNickname;
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 닉네임 이미 등록된 경우 */
+	_clientManager.changeNickname(sessionIndex, oldNickname, newNickname);
+	_channelManager.changeNickname(client, oldNickname, newNickname);
+
+	/* - 가입된 채널의 유저들에게 NICK 변경 알림 */
+	message._prefix = oldNickname + "!~b@" + client->getServername();
+	message._command = "NICK";
+	message._trailing = newNickname;
+	std::string res = message.toString();
+
+	std::set<std::string> joinedChannelNames = client->getChannels();
+	if (joinedChannelNames.size() > 0)
+	{
+		broadcastChannelsWithoutMe(sessionIndex, joinedChannelNames, res);
+	}
+
+	_sendPacketFunc(sessionIndex, res);
 }
 
 void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 {
-	if (_clientManager.checkClient(sessionIndex))
+	IRCMessage message;
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		//sendPacketFunc();
 		return ;
 	}
 
-	if (req._parameters.size() != 1)
+	if (req._parameters.size() != 3)
 	{
 		//sendPacketFunc();
 		return ;
 	}
 
 	std::string &nickname = req._parameters[0];
-	if (_clientManager.checkNick(nickname))
+	if (_clientManager.isUsedNickname(nickname))
 	{
 		//sendPacketFunc();
 		return ;
 	}
 
-
 	Client* client = _clientManager.getClient(sessionIndex);
-	std::string &hostname = req._parameters[1];
-	std::string &name = req._parameters[2];
-	client->setNickname(nickname);
-	client->setName(hostname);
-	client->setHostname(name);
+	client->setUsername(req._parameters[0]);
+	client->setHostname(req._parameters[1]);
+	client->setServername(req._parameters[2]);
+	client->setName(req._trailing);
 }
 
 void PacketManager::processPing(int sessionIndex, IRCMessage &req)
@@ -185,7 +240,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
 
-	if (_clientManager.checkClient(sessionIndex) == FAIL)
+	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return ;
 	}
@@ -247,7 +302,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	std::string nickname = _clientManager.getClient(sessionIndex)->getNickname();
 
-	if (_clientManager.checkClient(sessionIndex) == FAIL)
+	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return;
 	}
@@ -273,7 +328,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 		memset(&message, 0, sizeof(IRCMessage));
 		if ((*it)[0] == '#')
 		{
-			Channel *channel = _channelManager.getChannel(*it);
+			Channel* channel = _channelManager.getChannel(*it);
 			if (!channel)
 			{
 				message._command = "401";
@@ -301,7 +356,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 		}
 		else
 		{
-			Client *client = _clientManager.getClientByNickname(*it);
+			Client* client = _clientManager.getClientByNickname(*it);
 			if (!client)
 			{
 				message._command = "401";
