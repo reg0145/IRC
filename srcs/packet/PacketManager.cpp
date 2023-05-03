@@ -90,7 +90,7 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	Client* client = _clientManager.getClient(sessionIndex);
 
-	if (client->getIsPass() == true)
+	if (client->getIsPass())
 	{
 		message._command = "462";
 		message._trailing = "You may not reregister";
