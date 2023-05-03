@@ -26,14 +26,13 @@ class PacketManager
 		void processJoin(int sessionIndex, IRCMessage &req);
 		void processPrivmsg(int sessionIndex, IRCMessage &req);
 
-		bool getIsPass();
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 
 	private:
 		char* _password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
-		typedef void(PacketManager::* PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
+		typedef void(PacketManager::*PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
 
 		std::map<std::string, PROCESS_RECV_PACKET_FUNCTION> _recvFuntionDictionary;
 };

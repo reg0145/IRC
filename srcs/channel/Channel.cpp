@@ -9,12 +9,12 @@ Channel::~Channel()
 {
 }
 
-void Channel::addClient(Client *client)
+void Channel::addClient(Client* client)
 {
 	_clients[client->getNickname()] = client;
 }
 
-void Channel::removeClient(Client *client)
+void Channel::removeClient(Client* client)
 {
 	std::string nickname = client->getNickname();
 	std::map<std::string, Client*>::iterator it = _clients.find(nickname);

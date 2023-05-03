@@ -18,7 +18,7 @@ class SocketReactor
 
 	private:
 		int _kqueue;
-		struct kevent *_currentEvent;
+		struct kevent* _currentEvent;
 
 		T* _object;
 		EventHandler _onEventSuccess;

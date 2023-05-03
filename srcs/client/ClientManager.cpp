@@ -4,7 +4,7 @@ ClientManager::ClientManager()
 {
 	for (int i = 0; i < 1024; ++i)
 	{
-		Client *client = new (std::nothrow) Client(i);
+		Client* client = new (std::nothrow) Client(i);
 
 		if (!client)
 		{
@@ -22,7 +22,7 @@ ClientManager::~ClientManager()
 
 bool ClientManager::checkClient(int sessionIndex)
 {
-	Client *client = getClient(sessionIndex);
+	Client* client = getClient(sessionIndex);
 
 	if (client->getNickname() == "" || !client->getIsPass())
 	{
@@ -34,7 +34,7 @@ bool ClientManager::checkClient(int sessionIndex)
 
 bool ClientManager::isFailedPass(int sessionIndex)
 {
-	Client *client = getClient(sessionIndex);
+	Client* client = getClient(sessionIndex);
 
 	if (client->getIsPass())
 	{
@@ -63,7 +63,7 @@ bool ClientManager::isValidNickname(std::string nickname)
 
 bool ClientManager::isUsedNickname(std::string nickname)
 {
-	std::map<std::string, Client *>::iterator it = _clients.find(nickname);
+	std::map<std::string, Client*>::iterator it = _clients.find(nickname);
 
 	if (it == _clients.end())
 	{
@@ -74,7 +74,7 @@ bool ClientManager::isUsedNickname(std::string nickname)
 
 bool ClientManager::isJoinedChannel(int sessionIndex, std::string channelName)
 {
-	Client *client = getClient(sessionIndex);
+	Client* client = getClient(sessionIndex);
 
 	if (client->getChannel(channelName) != "")
 	{
@@ -101,7 +101,7 @@ void ClientManager::addClient(int sessionIndex, std::string nickname)
 
 void ClientManager::removeClient(int sessionIndex)
 {
-	Client *client = getClient(sessionIndex);
+	Client* client = getClient(sessionIndex);
 
 	if (client)
 	{
@@ -110,14 +110,14 @@ void ClientManager::removeClient(int sessionIndex)
 	}
 }
 
-Client *ClientManager::getClient(int sessionIndex)
+Client* ClientManager::getClient(int sessionIndex)
 {
 	return _clientPool[sessionIndex];
 }
 
-Client *ClientManager::getClientByNickname(std::string nickname)
+Client* ClientManager::getClientByNickname(std::string nickname)
 {
-	std::map<std::string, Client *>::iterator it;
+	std::map<std::string, Client*>::iterator it;
 	it = _clients.find(nickname);
 
 	if (it == _clients.end())

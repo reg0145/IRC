@@ -12,8 +12,8 @@ class Channel
 		Channel(std::string channelName);
 		~Channel();
 
-		void addClient(Client *client);
-		void removeClient(Client *client);
+		void addClient(Client* client);
+		void removeClient(Client* client);
 		void removeClientByNickname(std::string nickname);
 		void addOperator(std::string nickname);
 		void removeOperator(std::string nickname);
