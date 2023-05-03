@@ -19,7 +19,7 @@ class Session
 
 		int getClientSocket();
 
-		static void(*_addPacketFunc)(int, IRCMessage&);
+		static void(*_addPacketFunc)(int, IRCMessage);
 
 	private :
 		void close();
