@@ -16,7 +16,7 @@ class ClientManager
 		ClientManager();
 		~ClientManager();
 
-		bool checkClient(int sessionIndex);
+		bool isUnRegistedClient(int sessionIndex);
 		bool isFailedPass(int sessionIndex);
 		bool isValidNickname(std::string nickname);
 		bool isUsedNickname(std::string nickname);
