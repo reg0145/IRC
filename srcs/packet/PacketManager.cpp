@@ -15,6 +15,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["PING"] = &PacketManager::processPing;
 	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
+	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -56,6 +57,21 @@ void PacketManager::broadcastChannels(const std::set<std::string> &channelNames,
 	}
 }
 
+void PacketManager::broadcastChannelWithoutMe(int sessionIndex, Channel *channel, std::string &res)
+{
+	std::map<std::string, Client*>::iterator itClient;
+	std::map<std::string, Client*> &clients = channel->getClients();
+
+	for (itClient = clients.begin(); itClient != clients.end(); itClient++)
+	{
+		int recieverIndex = itClient->second->getSessionIndex();
+		if (sessionIndex != recieverIndex)
+		{
+			_sendPacketFunc(recieverIndex, res);
+		}
+	}
+}
+
 void PacketManager::broadcastChannelsWithoutMe(int sessionIndex, const std::set<std::string> &channelNames, std::string &res)
 {
 	std::set<std::string>::iterator itChannelName;
@@ -64,17 +80,9 @@ void PacketManager::broadcastChannelsWithoutMe(int sessionIndex, const std::set<
 	{
 		Channel *channel = _channelManager.getChannel(*itChannelName);
 
-		std::map<std::string, Client*>::iterator itClient;
-		std::map<std::string, Client*> &clients = channel->getClients();
-		for (itClient = clients.begin(); itClient != clients.end(); itClient++)
-		{
-			int clientSessionIndex = itClient->second->getSessionIndex();
-			if (sessionIndex != clientSessionIndex)
-			{
-				_sendPacketFunc(clientSessionIndex, res);
-			}
-		}
+		broadcastChannelWithoutMe(sessionIndex, channel, res);
 	}
+
 }
 
 void PacketManager::processDisconnect(int sessionIndex, IRCMessage &req)
@@ -335,7 +343,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 	for (std::list<std::string>::const_iterator it = targets.begin(); it != targets.end(); ++it)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
-		if ((*it)[0] == '#')
+		if (_channelManager.isValidChannelName(*it))
 		{
 			Channel* channel = _channelManager.getChannel(*it);
 			if (!channel)
@@ -361,7 +369,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 			message._parameters.push_back(*it);
 			message._trailing = req._trailing;
 			std::string res = message.toString();
-			broadcastChannel(channel->getChannelName(), res);
+			broadcastChannelWithoutMe(sessionIndex, channel, res);
 		}
 		else
 		{
@@ -377,6 +385,62 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 			}
 			message._prefix = nickname;
 			message._command = "PRIVMSG";
+			message._parameters.push_back(*it);
+			message._trailing = req._trailing;
+			std::string res = message.toString();
+			_sendPacketFunc(client->getSessionIndex(), res);
+		}
+	}
+}
+
+void PacketManager::processNotice(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	std::string nickname = _clientManager.getClient(sessionIndex)->getNickname();
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return;
+	}
+	if(req._parameters.size() != 1)
+	{
+		return;
+	}
+	if (req._trailing == "")
+	{
+		return;
+	}
+	std::list<std::string> targets = IRCMessage::split(req._parameters[0], ",");
+	for (std::list<std::string>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+	{
+		memset(&message, 0, sizeof(IRCMessage));
+		if (_channelManager.isValidChannelName(*it))
+		{
+			Channel* channel = _channelManager.getChannel(*it);
+			if (!channel)
+			{
+				continue;
+			}
+			if (!channel->isClientInChannel(nickname))
+			{
+				continue;
+			}
+			message._prefix = nickname;
+			message._command = "NOTICE";
+			message._parameters.push_back(*it);
+			message._trailing = req._trailing;
+			std::string res = message.toString();
+			broadcastChannelWithoutMe(sessionIndex, channel, res);
+		}
+		else
+		{
+			Client* client = _clientManager.getClientByNickname(*it);
+			if (!client)
+			{
+				continue;
+			}
+			message._prefix = nickname;
+			message._command = "NOTICE";
 			message._parameters.push_back(*it);
 			message._trailing = req._trailing;
 			std::string res = message.toString();
