@@ -191,11 +191,6 @@ void PacketManager::processNick(int sessionIndex, IRCMessage &req)
 	message._trailing = newNickname;
 	std::string res = message.toString();
 	_sendPacketFunc(sessionIndex, res);
-
-	memset(&message, 0, sizeof(IRCMessage));
-	message._trailing = "You're now known as " + newNickname;
-	res = message.toString();
-	_sendPacketFunc(sessionIndex, res);
 }
 
 void PacketManager::processUser(int sessionIndex, IRCMessage &req)
