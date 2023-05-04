@@ -436,18 +436,19 @@ void PacketManager::processNotice(int sessionIndex, IRCMessage &req)
 
 void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 {
+	Client* client = _clientManager.getClient(sessionIndex);
+
 	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
+		client.leaveClient();
 		return ;
 	}
-
-	IRCMessage message;
-	Client* client = _clientManager.getClient(sessionIndex);
 
 	/* 가입된 채널의 유저들에게 QUIT 알림 */
 	std::set<std::string>::iterator itChannelName;
 	std::set<std::string> channelNames = client->getChannels();
 
+	IRCMessage message;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		_channelManager.leaveClient(*itChannelName, client);
@@ -459,5 +460,6 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 	}
 
 	_clientManager.removeClient(sessionIndex);
+
 	std::cout << ">> client[" << sessionIndex << "] Disconnected <<" << std::endl;
 }
