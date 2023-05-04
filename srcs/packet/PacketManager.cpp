@@ -209,19 +209,37 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
 
-	if (_clientManager.isUnRegistedClient(sessionIndex))
+	/* 인증 확인 */
+	if (_clientManager.isFailedPass(sessionIndex))
 	{
-		//sendPacketFunc();
+		message._command = "ERROR";
+		message._trailing = "Authentication failed";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
 
+	/* 파라미터 부족 확인 */
 	if (req._parameters.size() != 3)
 	{
-		//sendPacketFunc();
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
 
+	/* USER 재등록 확인 */
 	Client* client = _clientManager.getClient(sessionIndex);
+	if (client->getUsername() != "")
+	{
+		message._command = "462";
+		message._trailing = "You may not reregister";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
 	client->setUsername(req._parameters[0]);
 	client->setHostname(req._parameters[1]);
 	client->setServername(req._parameters[2]);
@@ -340,7 +358,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
 		Channel* channel = _channelManager.getChannel(*itChannelName);
-	
+
 		if (!channel)
 		{
 			message._command = "403";

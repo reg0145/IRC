@@ -22,8 +22,9 @@ class Client
 		std::string getServername() const;
 		std::string getChannel(std::string channelName);
 		const std::set<std::string> &getChannels() const;
-
 		bool getIsPass() const;
+		bool getIsAdmin() const;
+
 		void setPassTrue();
 		void setName(std::string name);
 		void setNickname(std::string nickname);
