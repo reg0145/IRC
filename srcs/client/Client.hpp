@@ -15,6 +15,7 @@ class Client
 		void leaveClient();
 
 		int getSessionIndex() const;
+		bool getIsAdmin() const;
 		std::string getName() const;
 		std::string getNickname() const;
 		std::string getUsername() const;
@@ -25,6 +26,7 @@ class Client
 
 		bool getIsPass() const;
 		void setPassTrue();
+		void setAdminTrue();
 		void setName(std::string name);
 		void setNickname(std::string nickname);
 		void setUsername(std::string username);

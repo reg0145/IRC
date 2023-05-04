@@ -7,7 +7,7 @@
 #include "../message/IRCMessage.hpp"
 #include "../channel/ChannelManager.hpp"
 #include "../client/ClientManager.hpp"
-
+#include "../admin/AdminManager.hpp"
 class PacketManager
 {
 	public:
@@ -29,15 +29,18 @@ class PacketManager
 		void processOper(int sessionIndex, IRCMessage &req);
 		void processQuit(int sessionIndex, IRCMessage &req);
 
+
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 
 	private:
 		char* _password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
+		AdminManager _adminManager;
 		typedef void(PacketManager::*PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
 
 		std::map<std::string, PROCESS_RECV_PACKET_FUNCTION> _recvFuntionDictionary;
+
 };
 
 #endif

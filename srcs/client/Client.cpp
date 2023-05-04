@@ -88,6 +88,16 @@ bool Client::getIsPass() const
 	return _isPass;
 }
 
+bool Client::getIsAdmin() const
+{
+	return _isAdmin;
+}
+
+void Client::setAdminTrue()
+{
+	_isAdmin = true;
+}
+
 void Client::setPassTrue()
 {
 	_isPass = true;
