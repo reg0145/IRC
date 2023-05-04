@@ -6,7 +6,7 @@
 struct RecvPacketInfo
 {
 	int sessionIndex;
-	IRCMessage &message;
+	IRCMessage message;
 };
 
 #endif

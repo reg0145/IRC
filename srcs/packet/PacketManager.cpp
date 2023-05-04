@@ -6,9 +6,7 @@ void (*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 void PacketManager::init(char* password)
 {
 	_password = password;
-	PacketManager::_sendPacketFunc = &SessionManager::sendPacketFunc;
 
-	_recvFuntionDictionary["DISCONNECT"] = &PacketManager::processDisconnect;
 	_recvFuntionDictionary["NICK"] = &PacketManager::processNick;
 	_recvFuntionDictionary["PASS"] = &PacketManager::processPass;
 	_recvFuntionDictionary["USER"] = &PacketManager::processUser;
@@ -17,6 +15,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["PART"] = &PacketManager::processPart;
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
+	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -91,13 +90,6 @@ void PacketManager::broadcastChannelsWithoutMe(int sessionIndex, const std::set<
 
 }
 
-void PacketManager::processDisconnect(int sessionIndex, IRCMessage &req)
-{
-	(void)req;
-	_clientManager.removeClient(sessionIndex);
-	std::cout << ">> client[" << sessionIndex << "] Disconnected <<" << std::endl;
-}
-
 void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 {
 
@@ -112,7 +104,7 @@ void PacketManager::processPass(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	
+
 	if (req._parameters.size() != 1)
 	{
 		message._command = "461";
@@ -224,13 +216,6 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 	}
 
 	if (req._parameters.size() != 3)
-	{
-		//sendPacketFunc();
-		return ;
-	}
-
-	std::string &nickname = req._parameters[0];
-	if (_clientManager.isUsedNickname(nickname))
 	{
 		//sendPacketFunc();
 		return ;
@@ -520,4 +505,33 @@ void PacketManager::processNotice(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(client->getSessionIndex(), res);
 		}
 	}
+}
+
+void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
+{
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		client.leaveClient();
+		return ;
+	}
+
+	/* 가입된 채널의 유저들에게 QUIT 알림 */
+	IRCMessage message;
+	std::set<std::string>::iterator itChannelName;
+	std::set<std::string> channelNames = client->getChannels();
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		_channelManager.leaveClient(*itChannelName, client);
+		message._prefix = client->getNickname() + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "QUIT";
+		message._trailing = req._trailing;
+		std::string res = message.toString();
+		broadcastChannel(*itChannelName, res);
+	}
+
+	_clientManager.removeClient(sessionIndex);
+
+	std::cout << ">> client[" << sessionIndex << "] Disconnected <<" << std::endl;
 }

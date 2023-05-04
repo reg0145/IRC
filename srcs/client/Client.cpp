@@ -32,6 +32,7 @@ void Client::leaveClient()
 	_nickname = "";
 	_username = "";
 	_hostname = "";
+	_servername = "";
 	_isPass = false;
 	_isAdmin = false;
 	_channels.clear();
