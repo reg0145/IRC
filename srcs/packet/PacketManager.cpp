@@ -266,7 +266,8 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	std::list<std::string>::iterator itChannelName;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		if (_channelManager.isValidChannelName(*itChannelName) == false)
+		memset(&message, 0, sizeof(IRCMessage));
+		if (!_channelManager.isValidChannelName(*itChannelName))
 		{
 			message._command = "403";
 			message._parameters.push_back(*itChannelName);
@@ -275,11 +276,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			return ;
 		}
-	}
 
-	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
-	{
-		message._parameters.clear();
 		if (_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
 			message._command = "443";
@@ -290,11 +287,13 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
+
 		if (_channelManager.enterClient(*itChannelName, client) == FAIL)
 		{
 			/* new Channel 실패(malloc 실패) 코드 */
 			return ;
 		}
+
 		message._command = "353";
 		message._parameters.push_back(client->getNickname());
 		message._parameters.push_back("=");
