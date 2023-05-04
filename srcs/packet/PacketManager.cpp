@@ -513,7 +513,7 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 
 	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
-		client.leaveClient();
+		client->leaveClient();
 		return ;
 	}
 
