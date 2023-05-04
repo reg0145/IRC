@@ -281,12 +281,6 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 
 		if (_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
-			message._command = "443";
-			message._parameters.push_back(nickname);
-			message._parameters.push_back(*itChannelName);
-			message._trailing = "is already on channel";
-			std::string res = message.toString();
-			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
 
