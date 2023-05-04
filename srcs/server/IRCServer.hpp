@@ -18,7 +18,6 @@ class IRCServer
 		void start();
 
 		static void addPacketFunc(int sessionIndex, IRCMessage message);
-		static void addDisConnectPacketFunc(int sessionIndex);
 
 	private:
 		void onRequestHandler(int socket);
@@ -31,7 +30,6 @@ class IRCServer
 		PacketManager _packetManager;
 
 		static std::deque<RecvPacketInfo> _packetQueue;
-		static std::deque<int> _disconnectPacketQueue;
 };
 
 #endif

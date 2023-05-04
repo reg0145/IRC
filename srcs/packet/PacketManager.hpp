@@ -18,7 +18,6 @@ class PacketManager
 		void broadcastChannels(const std::set<std::string> &channelNames, std::string &res);
 		void broadcastChannelWithoutMe(int sessionIndex, Channel *channel, std::string &res);
 		void broadcastChannelsWithoutMe(int sessionIndex, const std::set<std::string> &channelNames, std::string &res);
-		void processDisconnect(int sessionIndex, IRCMessage &req);
 		void processNick(int sessionIndex, IRCMessage &req);
 		void processPass(int sessionIndex, IRCMessage &req);
 		void processUser(int sessionIndex, IRCMessage &req);
@@ -29,7 +28,6 @@ class PacketManager
 		void processQuit(int sessionIndex, IRCMessage &req);
 
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
-		static void(*_addDisConnectPacketFunc)(int sessionIndex);
 
 	private:
 		char* _password;
