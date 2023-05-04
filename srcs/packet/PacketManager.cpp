@@ -263,44 +263,53 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	}
 
 	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::string nickname = client->getNickname();
 	std::list<std::string>::iterator itChannelName;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		if (_channelManager.isValidChannelName(*itChannelName) == false)
+		memset(&message, 0, sizeof(IRCMessage));
+		if (!_channelManager.isValidChannelName(*itChannelName))
 		{
 			message._command = "403";
+			message._parameters.push_back(nickname);
 			message._parameters.push_back(*itChannelName);
 			message._trailing = "No such channel";
 			std::string res = message.toString();
 			_sendPacketFunc(sessionIndex, res);
 			return ;
 		}
-	}
 
-	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
-	{
-		message._parameters.clear();
 		if (_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
-			message._command = "443";
-			message._parameters.push_back(client->getNickname());
-			message._parameters.push_back(*itChannelName);
-			message._trailing = "is already on channel";
-			std::string res = message.toString();
-			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
+
 		if (_channelManager.enterClient(*itChannelName, client) == FAIL)
 		{
 			/* new Channel 실패(malloc 실패) 코드 */
 			return ;
 		}
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "JOIN";
+		message._parameters.push_back(*itChannelName);
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+
+		memset(&message, 0, sizeof(IRCMessage));
 		message._command = "353";
-		message._parameters.push_back(client->getNickname());
+		message._parameters.push_back(nickname);
 		message._parameters.push_back("=");
 		message._parameters.push_back(*itChannelName);
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
-		std::string res = message.toString();
+		res = message.toString();
+		broadcastChannel(*itChannelName, res);
+
+		memset(&message, 0, sizeof(IRCMessage));
+		message._command = "366";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(*itChannelName);
+		message._trailing = "End of /NAMES list.";
+		res = message.toString();
 		broadcastChannel(*itChannelName, res);
 	}
 }
@@ -342,7 +351,6 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
-
 		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
 			message._command = "442";
