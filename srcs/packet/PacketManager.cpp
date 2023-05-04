@@ -330,7 +330,9 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
-		if (!_channelManager.isValidChannelName(*itChannelName) || !_channelManager.getChannel(*itChannelName))
+		Channel* channel = _channelManager.getChannel(*itChannelName);
+	
+		if (!channel)
 		{
 			message._command = "403";
 			message._parameters.push_back(nickname);
@@ -352,7 +354,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			continue ;
 		}
 
-		_channelManager.leaveClient(*itChannelName, client);
+		_channelManager.leaveClient(*channel, client);
 
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "PART";
@@ -516,7 +518,12 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 	std::set<std::string> channelNames = client->getChannels();
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		_channelManager.leaveClient(*itChannelName, client);
+		Channel* channel = _channelManager.getChannel(*itChannelName);
+		if (!channel)
+		{
+			continue;
+		}
+		_channelManager.leaveClient(*channel, client);
 		message._prefix = client->getNickname() + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "QUIT";
 		message._trailing = req._trailing;
