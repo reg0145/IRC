@@ -295,13 +295,19 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			/* new Channel 실패(malloc 실패) 코드 */
 			return ;
 		}
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "JOIN";
+		message._parameters.push_back(*itChannelName);
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
 
+		memset(&message, 0, sizeof(IRCMessage));
 		message._command = "353";
 		message._parameters.push_back(nickname);
 		message._parameters.push_back("=");
 		message._parameters.push_back(*itChannelName);
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
-		std::string res = message.toString();
+		res = message.toString();
 		broadcastChannel(*itChannelName, res);
 
 		memset(&message, 0, sizeof(IRCMessage));
