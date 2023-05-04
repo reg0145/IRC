@@ -376,10 +376,10 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			continue ;
 		}
 
-		message._prefix = nickname + "!" + nickname + "@" + client->getServername();
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "PART";
 		message._parameters.push_back(*itChannelName);
-		message._trailing = req._trailing;
+		message._trailing = req._trailing.size() ? req._trailing : "Leaving";
 		std::string res = message.toString();
 
 		_sendPacketFunc(sessionIndex, res);
