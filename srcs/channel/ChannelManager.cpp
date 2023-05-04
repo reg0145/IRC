@@ -49,11 +49,11 @@ int ChannelManager::leaveClient(Channel &channel, Client* client)
 
 bool ChannelManager::isValidChannelName(std::string channelName)
 {
-	if (channelName[0] == '#' || channelName[0] == '&')
+	if ((channelName[0] != '#' && channelName[0] != '&') || !(channelName.size() > 2 && channelName.size() < 20))
 	{
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void ChannelManager::changeNickname(Client* client, std::string oldNickname, std::string newNickname)
