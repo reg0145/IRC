@@ -229,10 +229,6 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 	client->setHostname(req._parameters[1]);
 	client->setServername(req._parameters[2]);
 	client->setName(req._trailing);
-	std::cout << client->getUsername() << std::endl;
-	std::cout << client->getHostname() << std::endl;
-	std::cout << client->getServername() << std::endl;
-	std::cout << client->getName() << std::endl;
 }
 
 void PacketManager::processPing(int sessionIndex, IRCMessage &req)
