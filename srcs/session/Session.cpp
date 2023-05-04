@@ -39,6 +39,10 @@ void Session::onReadable()
 			std::cout << "- traling: " << it->_trailing << std::endl;
 			std::cout << std::endl;
 			_addPacketFunc(_sessionIndex, *it);
+			if (it->_command == "QUIT")
+			{
+				break;
+			}
 		}
 	}
 }
