@@ -17,7 +17,7 @@ class IRCServer
 		void init(int port, char* password);
 		void start();
 
-		static void addPacketFunc(int sessionIndex, IRCMessage &message);
+		static void addPacketFunc(int sessionIndex, IRCMessage message);
 
 	private:
 		void onRequestHandler(int socket);
@@ -29,7 +29,6 @@ class IRCServer
 		SessionManager _sessionManager;
 		PacketManager _packetManager;
 
-		//void (Session::*_sendPacketFunc)(int, size_t);
 		static std::deque<RecvPacketInfo> _packetQueue;
 };
 
