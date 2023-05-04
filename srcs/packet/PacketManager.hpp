@@ -7,7 +7,6 @@
 #include "../message/IRCMessage.hpp"
 #include "../channel/ChannelManager.hpp"
 #include "../client/ClientManager.hpp"
-#include "../session/SessionManager.hpp"
 
 class PacketManager
 {
@@ -19,15 +18,16 @@ class PacketManager
 		void broadcastChannels(const std::set<std::string> &channelNames, std::string &res);
 		void broadcastChannelWithoutMe(int sessionIndex, Channel *channel, std::string &res);
 		void broadcastChannelsWithoutMe(int sessionIndex, const std::set<std::string> &channelNames, std::string &res);
-		void processDisconnect(int sessionIndex, IRCMessage &req);
 		void processNick(int sessionIndex, IRCMessage &req);
 		void processPass(int sessionIndex, IRCMessage &req);
 		void processUser(int sessionIndex, IRCMessage &req);
 		void processPing(int sessionIndex, IRCMessage &req);
 		void processJoin(int sessionIndex, IRCMessage &req);
+		void processPart(int sessionIndex, IRCMessage &req);
 		void processPrivmsg(int sessionIndex, IRCMessage &req);
 		void processNotice(int sessionIndex, IRCMessage &req);
 		void processOper(int sessionIndex, IRCMessage &req);
+		void processQuit(int sessionIndex, IRCMessage &req);
 
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 

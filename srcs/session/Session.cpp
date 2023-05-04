@@ -1,6 +1,6 @@
 #include "Session.hpp"
 
-void (*Session::_addPacketFunc)(int, IRCMessage&) = 0;
+void (*Session::_addPacketFunc)(int sessionIndex, IRCMessage message) = 0;
 
 Session::Session(int sessionIndex, int clientSocket) : _sessionIndex(sessionIndex), _clientSocket(clientSocket)
 {
@@ -39,6 +39,10 @@ void Session::onReadable()
 			std::cout << "- traling: " << it->_trailing << std::endl;
 			std::cout << std::endl;
 			_addPacketFunc(_sessionIndex, *it);
+			if (it->_command == "QUIT")
+			{
+				break;
+			}
 		}
 	}
 }
@@ -46,10 +50,9 @@ void Session::onReadable()
 void Session::close()
 {
 	IRCMessage message;
-	message._command = "DISCONNECT";
-	_messages.push_back(message);
+	message._command = "QUIT";
 
-	_addPacketFunc(_sessionIndex, _messages.front());
+	_addPacketFunc(_sessionIndex, message);
 }
 
 int Session::getClientSocket()

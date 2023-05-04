@@ -28,38 +28,32 @@ int ChannelManager::enterClient(std::string channelName, Client* client)
 	return SUCCESS;
 }
 
-int ChannelManager::leaveClient(std::string channelName, Client* client)
+int ChannelManager::leaveClient(Channel &channel, Client* client)
 {
-	Channel* channel = getChannel(client->getChannel(channelName));
-
-	if (!channel)
-	{
-		return FAIL;
-	}
-
 	std::string nickname = client->getNickname();
-	if (channel->isOperator(nickname))
+
+	if (channel.isOperator(nickname))
 	{
-		channel->removeOperator(nickname);
+		channel.removeOperator(nickname);
 	}
 
-	channel->removeClient(client);
-	client->removeChannel(channelName);
+	channel.removeClient(client);
+	client->removeChannel(channel.getChannelName());
 
-	if (channel->getClientCount() == 0)
+	if (channel.getClientCount() == 0)
 	{
-		removeChannel(channel);
+		removeChannel(&channel);
 	}
 	return SUCCESS;
 }
 
 bool ChannelManager::isValidChannelName(std::string channelName)
 {
-	if (channelName[0] == '#' || channelName[0] == '&')
+	if ((channelName[0] != '#' && channelName[0] != '&') || !(channelName.size() > 1 && channelName.size() < 20))
 	{
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void ChannelManager::changeNickname(Client* client, std::string oldNickname, std::string newNickname)
