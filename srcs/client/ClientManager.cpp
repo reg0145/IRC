@@ -45,7 +45,7 @@ bool ClientManager::isFailedPass(int sessionIndex)
 
 bool ClientManager::isValidNickname(std::string nickname)
 {
-	if (nickname.length() > 9)
+	if (nickname.length() > 20)
 	{
 		return false;
 	}

@@ -23,6 +23,7 @@ class PacketManager
 		void processUser(int sessionIndex, IRCMessage &req);
 		void processPing(int sessionIndex, IRCMessage &req);
 		void processJoin(int sessionIndex, IRCMessage &req);
+		void processPart(int sessionIndex, IRCMessage &req);
 		void processPrivmsg(int sessionIndex, IRCMessage &req);
 		void processNotice(int sessionIndex, IRCMessage &req);
 		void processQuit(int sessionIndex, IRCMessage &req);

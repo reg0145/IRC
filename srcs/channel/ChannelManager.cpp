@@ -28,27 +28,21 @@ int ChannelManager::enterClient(std::string channelName, Client* client)
 	return SUCCESS;
 }
 
-int ChannelManager::leaveClient(std::string channelName, Client* client)
+int ChannelManager::leaveClient(Channel &channel, Client* client)
 {
-	Channel* channel = getChannel(client->getChannel(channelName));
-
-	if (!channel)
-	{
-		return FAIL;
-	}
-
 	std::string nickname = client->getNickname();
-	if (channel->isOperator(nickname))
+
+	if (channel.isOperator(nickname))
 	{
-		channel->removeOperator(nickname);
+		channel.removeOperator(nickname);
 	}
 
-	channel->removeClient(client);
-	client->removeChannel(channelName);
+	channel.removeClient(client);
+	client->removeChannel(channel.getChannelName());
 
-	if (channel->getClientCount() == 0)
+	if (channel.getClientCount() == 0)
 	{
-		removeChannel(channel);
+		removeChannel(&channel);
 	}
 	return SUCCESS;
 }

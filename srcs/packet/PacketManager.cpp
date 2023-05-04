@@ -12,6 +12,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["USER"] = &PacketManager::processUser;
 	_recvFuntionDictionary["PING"] = &PacketManager::processPing;
 	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
+	_recvFuntionDictionary["PART"] = &PacketManager::processPart;
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
 	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
@@ -34,6 +35,11 @@ void PacketManager::process(int sessionIndex, IRCMessage &message)
 void PacketManager::broadcastChannel(const std::string &channelName, std::string &res)
 {
 	Channel *channel = _channelManager.getChannel(channelName);
+
+	if (!channel)
+	{
+		return ;
+	}
 
 	std::map<std::string, Client*>::iterator itClient;
 	std::map<std::string, Client*> &clients = channel->getClients();
@@ -299,6 +305,68 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	}
 }
 
+void PacketManager::processPart(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+
+	if (req._parameters.size() != 1)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::string nickname = client->getNickname();
+	std::list<std::string>::iterator itChannelName;
+	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
+	{
+		memset(&message, 0, sizeof(IRCMessage));
+		Channel* channel = _channelManager.getChannel(*itChannelName);
+	
+		if (!channel)
+		{
+			message._command = "403";
+			message._parameters.push_back(nickname);
+			message._parameters.push_back(*itChannelName);
+			message._trailing = "No such channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+
+		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
+		{
+			message._command = "442";
+			message._parameters.push_back(nickname);
+			message._parameters.push_back(*itChannelName);
+			message._trailing = "You're not on that channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+
+		_channelManager.leaveClient(*channel, client);
+
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "PART";
+		message._parameters.push_back(*itChannelName);
+		message._trailing = req._trailing.size() ? req._trailing : "Leaving";
+		std::string res = message.toString();
+
+		_sendPacketFunc(sessionIndex, res);
+		broadcastChannel(*itChannelName, res);
+	}
+}
+
 void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
@@ -440,7 +508,7 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 
 	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
-		client.leaveClient();
+		client->leaveClient();
 		return ;
 	}
 
@@ -450,7 +518,12 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 	std::set<std::string> channelNames = client->getChannels();
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		_channelManager.leaveClient(*itChannelName, client);
+		Channel* channel = _channelManager.getChannel(*itChannelName);
+		if (!channel)
+		{
+			continue;
+		}
+		_channelManager.leaveClient(*channel, client);
 		message._prefix = client->getNickname() + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "QUIT";
 		message._trailing = req._trailing;
