@@ -330,7 +330,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
-		if (!_channelManager.isValidChannelName(*itChannelName))
+		if (!_channelManager.isValidChannelName(*itChannelName) || !_channelManager.getChannel(*itChannelName))
 		{
 			message._command = "403";
 			message._parameters.push_back(nickname);
@@ -340,6 +340,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
+
 		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
 			message._command = "442";
@@ -350,16 +351,8 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
-		if (_channelManager.leaveClient(*itChannelName, client) == FAIL)
-		{
-			message._command = "403";
-			message._parameters.push_back(nickname);
-			message._parameters.push_back(*itChannelName);
-			message._trailing = "No such channel";
-			std::string res = message.toString();
-			_sendPacketFunc(sessionIndex, res);
-			continue ;
-		}
+
+		_channelManager.leaveClient(*itChannelName, client);
 
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "PART";
