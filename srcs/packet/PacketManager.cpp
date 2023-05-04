@@ -445,10 +445,9 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 	}
 
 	/* 가입된 채널의 유저들에게 QUIT 알림 */
+	IRCMessage message;
 	std::set<std::string>::iterator itChannelName;
 	std::set<std::string> channelNames = client->getChannels();
-
-	IRCMessage message;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		_channelManager.leaveClient(*itChannelName, client);
