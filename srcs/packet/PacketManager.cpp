@@ -263,6 +263,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	}
 
 	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::string nickname = client->getNickname();
 	std::list<std::string>::iterator itChannelName;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
@@ -270,6 +271,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		if (!_channelManager.isValidChannelName(*itChannelName))
 		{
 			message._command = "403";
+			message._parameters.push_back(nickname);
 			message._parameters.push_back(*itChannelName);
 			message._trailing = "No such channel";
 			std::string res = message.toString();
@@ -280,7 +282,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		if (_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
 		{
 			message._command = "443";
-			message._parameters.push_back(client->getNickname());
+			message._parameters.push_back(nickname);
 			message._parameters.push_back(*itChannelName);
 			message._trailing = "is already on channel";
 			std::string res = message.toString();
@@ -295,11 +297,19 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		}
 
 		message._command = "353";
-		message._parameters.push_back(client->getNickname());
+		message._parameters.push_back(nickname);
 		message._parameters.push_back("=");
 		message._parameters.push_back(*itChannelName);
 		message._trailing = _channelManager.getChannelInfo(*itChannelName);
 		std::string res = message.toString();
+		broadcastChannel(*itChannelName, res);
+
+		memset(&message, 0, sizeof(IRCMessage));
+		message._command = "366";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(*itChannelName);
+		message._trailing = "End of /NAMES list.";
+		res = message.toString();
 		broadcastChannel(*itChannelName, res);
 	}
 }

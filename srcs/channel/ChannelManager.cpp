@@ -49,7 +49,7 @@ int ChannelManager::leaveClient(Channel &channel, Client* client)
 
 bool ChannelManager::isValidChannelName(std::string channelName)
 {
-	if ((channelName[0] != '#' && channelName[0] != '&') || !(channelName.size() > 2 && channelName.size() < 20))
+	if ((channelName[0] != '#' && channelName[0] != '&') || !(channelName.size() > 1 && channelName.size() < 20))
 	{
 		return false;
 	}
