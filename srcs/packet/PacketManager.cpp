@@ -379,8 +379,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
-	Client *client = _clientManager.getClient(sessionIndex);
-	std::string nickname = client->getNickname();
+	std::string nickname = _clientManager.getClient(sessionIndex)->getNickname();
 	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return ;
