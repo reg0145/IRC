@@ -16,6 +16,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
 	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
+	_recvFuntionDictionary["KICK"] = &PacketManager::processKick;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -373,6 +374,30 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		broadcastChannel(*itChannelName, res);
 	}
+}
+
+void PacketManager::processKick(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+
+	std::list<std::string> channelName = IRCMessage::split(req._parameters[0], ",");
+	std::list<std::string> targetName = IRCMessage::split(req._parameters[1], ",");
+	if (req._parameters.size() != 2 || channelName.size() != 1 || targetName.size() != 1)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	std::string nickname = client->getNickname();
+	
 }
 
 void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
