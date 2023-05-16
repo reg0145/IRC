@@ -386,9 +386,7 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
-	std::list<std::string> targetNames = IRCMessage::split(req._parameters[1], ",");
-	if (req._parameters.size() != 2 || channelNames.size() != 1 || targetNames.size() != 1)
+	if (req._parameters.size() != 2)
 	{
 		message._command = "461";
 		message._trailing = "Not enough parameters";
@@ -398,9 +396,7 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 	}
 
 	std::string nickname = client->getNickname();
-	std::string targetName = targetNames.front();
-	Client* target = _clientManager.getClientByNickname(targetName);
-	std::string channelName = channelNames.front();
+	std::string channelName = req._parameters[0];
 	Channel* channel = _channelManager.getChannel(channelName);
 	if (!channel)
 	{
@@ -432,28 +428,36 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	if (!_clientManager.isJoinedChannel(target->getSessionIndex(), channelName))
+
+	std::list<std::string> targetNames = IRCMessage::split(req._parameters[1], ",");
+	std::list<std::string>::iterator itTargetName;
+	for (itTargetName = targetNames.begin(); itTargetName != targetNames.end(); itTargetName++)
 	{
-		message._command = "441";
-		message._parameters.push_back(targetName);
+		memset(&message, 0, sizeof(IRCMessage));
+		Client* target = _clientManager.getClientByNickname(*itTargetName);
+		if (!_clientManager.isJoinedChannel(target->getSessionIndex(), channelName))
+		{
+			message._command = "441";
+			message._parameters.push_back(*itTargetName);
+			message._parameters.push_back(channelName);
+			message._trailing = "They aren't on that channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+
+		_channelManager.leaveClient(*channel, target);
+
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "KICK";
 		message._parameters.push_back(channelName);
-		message._trailing = "They aren't on that channel";
+		message._parameters.push_back(*itTargetName);
+		message._trailing = req._trailing.size() ? req._trailing : "Kicked";
 		std::string res = message.toString();
-		_sendPacketFunc(sessionIndex, res);
-		return ;
+
+		_sendPacketFunc(target->getSessionIndex(), res);
+		broadcastChannel(channelName, res);
 	}
-
-	_channelManager.leaveClient(*channel, target);
-
-	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
-	message._command = "KICK";
-	message._parameters.push_back(channelName);
-	message._parameters.push_back(targetName);
-	message._trailing = req._trailing.size() ? req._trailing : "Kicked";
-	std::string res = message.toString();
-
-	_sendPacketFunc(target->getSessionIndex(), res);
-	broadcastChannel(channelName, res);
 }
 
 void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
