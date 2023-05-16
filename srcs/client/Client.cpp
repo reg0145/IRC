@@ -7,7 +7,7 @@ Client::Client(int sessionIndex)
 	  _username(""),
 	  _hostname(""),
 	  _isPass(false),
-	  _isAdmin(false)
+	  _isOperator(false)
 {
 	(void)_sessionIndex;
 }
@@ -34,7 +34,7 @@ void Client::leaveClient()
 	_hostname = "";
 	_servername = "";
 	_isPass = false;
-	_isAdmin = false;
+	_isOperator = false;
 	_channels.clear();
 }
 
@@ -88,14 +88,14 @@ bool Client::getIsPass() const
 	return _isPass;
 }
 
-bool Client::getIsAdmin() const
+bool Client::getIsOperator() const
 {
-	return _isAdmin;
+	return _isOperator;
 }
 
-void Client::setAdminTrue()
+void Client::setOperatorTrue()
 {
-	_isAdmin = true;
+	_isOperator = true;
 }
 
 void Client::setPassTrue()

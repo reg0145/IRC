@@ -7,7 +7,8 @@
 #include "../message/IRCMessage.hpp"
 #include "../channel/ChannelManager.hpp"
 #include "../client/ClientManager.hpp"
-#include "../admin/AdminManager.hpp"
+#include "../oper/OperatorManager.hpp"
+
 class PacketManager
 {
 	public:
@@ -36,7 +37,7 @@ class PacketManager
 		char* _password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
-		AdminManager _adminManager;
+		OperatorManager _operatorManager;
 		typedef void(PacketManager::*PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
 
 		std::map<std::string, PROCESS_RECV_PACKET_FUNCTION> _recvFuntionDictionary;

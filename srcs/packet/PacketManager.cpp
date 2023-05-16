@@ -6,7 +6,7 @@ void (*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 void PacketManager::init(char* password)
 {
 	_password = password;
-	_adminManager.init("admin", "admin");
+	_operatorManager.init("operator", "operator");
 
 	_recvFuntionDictionary["NICK"] = &PacketManager::processNick;
 	_recvFuntionDictionary["PASS"] = &PacketManager::processPass;
@@ -566,9 +566,9 @@ void PacketManager::processOper(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	std::string adminName = req._parameters[0];
-	std::string adminPassword = req._parameters[1];
-	if (!_adminManager.login(adminName, adminPassword))
+	std::string operatorName = req._parameters[0];
+	std::string operatorPassword = req._parameters[1];
+	if (!_operatorManager.login(operatorName, operatorPassword))
 	{
 
 		message._prefix = client->getNickname();
@@ -578,14 +578,14 @@ void PacketManager::processOper(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	if (client->getIsAdmin())
+	if (client->getIsoperator())
 	{
 		message._trailing = "You are already an IRC operator";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	client->setAdminTrue();
+	client->setoperatorTrue();
 	message._prefix = client->getNickname();
 	message._command = "381";
 	message._parameters.push_back("You are now an IRC operator");
