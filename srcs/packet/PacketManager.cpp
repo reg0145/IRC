@@ -422,7 +422,7 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	if (channel->isOperator(nickname))
+	if (!channel->isOperator(nickname))
 	{
 		message._command = "482";
 		message._parameters.push_back(nickname);
@@ -437,7 +437,7 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 		message._command = "441";
 		message._parameters.push_back(targetName);
 		message._parameters.push_back(channelName);
-		message._trailing = "You're not on that channel";
+		message._trailing = "They aren't on that channel";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
 		return ;
