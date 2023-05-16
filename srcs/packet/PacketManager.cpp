@@ -379,7 +379,8 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
-	std::string nickname = _clientManager.getClient(sessionIndex)->getNickname();
+	Client *client = _clientManager.getClient(sessionIndex);
+	std::string nickname = client->getNickname();
 	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return ;
@@ -415,9 +416,18 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
+	if (!channel->isOperator(nickname))
+	{
+		message._command = "482";
+		message._parameters.push_back(req._parameters[0]);
+		message._trailing = "You're not channel operator";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
 	if (req._hasTrailing)
 	{
-		std::cout << "setTopoic" <<std::endl;
+		std::cout << "setTopic" <<std::endl;
 		channel->setTopic(req._trailing);
 		message._prefix = nickname;
 		message._command = "TOPIC";
