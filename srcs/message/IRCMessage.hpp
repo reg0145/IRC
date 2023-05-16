@@ -20,6 +20,7 @@ class IRCMessage
 		std::string _command;
 		std::vector<std::string> _parameters;
 		std::string _trailing;
+		bool _hasTrailing;
 
 	private:
 		static IRCMessage parseMessage(const std::string &request);

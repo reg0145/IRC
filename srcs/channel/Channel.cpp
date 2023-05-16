@@ -86,6 +86,11 @@ std::string &Channel::getChannelName()
 	return _channelName;
 }
 
+std::string Channel::getTopic()
+{
+	return _topic;
+}
+
 int Channel::getClientCount()
 {
 	return _clients.size();
@@ -94,4 +99,9 @@ int Channel::getClientCount()
 std::map<std::string, Client*> &Channel::getClients()
 {
 	return _clients;
+}
+
+void Channel::setTopic(std::string topic)
+{
+	_topic = topic;
 }
