@@ -15,6 +15,7 @@ class Client
 		void leaveClient();
 
 		int getSessionIndex() const;
+		bool getIsOperator() const;
 		std::string getName() const;
 		std::string getNickname() const;
 		std::string getUsername() const;
@@ -25,6 +26,7 @@ class Client
 		bool getIsPass() const;
 
 		void setPassTrue();
+		void setOperatorTrue();
 		void setName(std::string name);
 		void setNickname(std::string nickname);
 		void setUsername(std::string username);
@@ -40,7 +42,7 @@ class Client
 		std::string _servername;
 		std::set<std::string> _channels;
 		bool _isPass;
-		bool _isAdmin;
+		bool _isOperator;
 };
 
 #endif

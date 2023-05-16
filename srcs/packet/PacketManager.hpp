@@ -7,6 +7,7 @@
 #include "../message/IRCMessage.hpp"
 #include "../channel/ChannelManager.hpp"
 #include "../client/ClientManager.hpp"
+#include "../oper/OperatorManager.hpp"
 
 class PacketManager
 {
@@ -26,7 +27,9 @@ class PacketManager
 		void processPart(int sessionIndex, IRCMessage &req);
 		void processPrivmsg(int sessionIndex, IRCMessage &req);
 		void processNotice(int sessionIndex, IRCMessage &req);
+		void processOper(int sessionIndex, IRCMessage &req);
 		void processQuit(int sessionIndex, IRCMessage &req);
+
 
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 
@@ -34,9 +37,11 @@ class PacketManager
 		char* _password;
 		ClientManager _clientManager;
 		ChannelManager _channelManager;
+		OperatorManager _operatorManager;
 		typedef void(PacketManager::*PROCESS_RECV_PACKET_FUNCTION)(int, IRCMessage&);
 
 		std::map<std::string, PROCESS_RECV_PACKET_FUNCTION> _recvFuntionDictionary;
+
 };
 
 #endif
