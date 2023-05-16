@@ -578,14 +578,14 @@ void PacketManager::processOper(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	if (client->getIsoperator())
+	if (client->getIsOperator())
 	{
 		message._trailing = "You are already an IRC operator";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	client->setoperatorTrue();
+	client->setOperatorTrue();
 	message._prefix = client->getNickname();
 	message._command = "381";
 	message._parameters.push_back("You are now an IRC operator");
