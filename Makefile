@@ -13,7 +13,7 @@ SRCS = ./srcs/main.cpp \
 	./srcs/client/Client.cpp \
 	./srcs/channel/ChannelManager.cpp \
 	./srcs/channel/Channel.cpp \
-	./srcs/operator/operatorManager.cpp
+	./srcs/oper/OperatorManager.cpp
 
 
 OBJS = $(SRCS:.cpp=.o)
