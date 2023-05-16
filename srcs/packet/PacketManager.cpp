@@ -352,7 +352,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
-		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
+		if (!channel->isClientInChannel(nickname))
 		{
 			message._command = "442";
 			message._parameters.push_back(nickname);
@@ -408,7 +408,7 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	if (!_clientManager.isJoinedChannel(sessionIndex, channelName))
+	if (!channel->isClientInChannel(nickname))
 	{
 		message._command = "442";
 		message._parameters.push_back(nickname);
@@ -435,11 +435,11 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
 		Client* target = _clientManager.getClientByNickname(*itTargetName);
-		if (!_clientManager.isJoinedChannel(target->getSessionIndex(), channelName))
+		if (!channel->isClientInChannel(*itTargetName))
 		{
 			message._command = "441";
-			message._parameters.push_back(*itTargetName);
 			message._parameters.push_back(channelName);
+			message._parameters.push_back(*itTargetName);
 			message._trailing = "They aren't on that channel";
 			std::string res = message.toString();
 			_sendPacketFunc(sessionIndex, res);
