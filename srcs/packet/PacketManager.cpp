@@ -274,7 +274,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	if (req._parameters.size() != 1)
+	if (req._parameters.size() < 1 || req._parameters.size() > 2)
 	{
 		message._command = "461";
 		message._trailing = "Not enough parameters";
@@ -283,9 +283,17 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
 	std::string nickname = client->getNickname();
+	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::list<std::string> passwords;
+
+	if (req._parameters.size() == 2)
+	{
+		passwords = IRCMessage::split(req._parameters[1], ",");
+	}
+
 	std::list<std::string>::iterator itChannelName;
+	std::list<std::string>::iterator itPassword = passwords.begin();
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
@@ -305,16 +313,84 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			continue ;
 		}
 
-		if (_channelManager.enterClient(*itChannelName, client) == FAIL)
+		Channel *channel = _channelManager.getChannel(*itChannelName);
+		std::string password = "";
+
+		if (itPassword != passwords.end())
 		{
-			/* new Channel 실패(malloc 실패) 코드 */
-			return ;
+			password = *itPassword;
+			itPassword++;
 		}
+		if (!channel)
+		{
+			channel = _channelManager.createChannel(*itChannelName);
+			if (!channel)
+			{
+				/* new Channel 실패(malloc 실패) 코드 */
+				return ;
+			}
+			channel->addOperator(nickname);
+		}
+		else 
+		{
+			if (channel->isModeOn(MODE_PASSWORD) && !channel->isPasswordTrue(password))
+			{
+				message._command = "475";
+				message._parameters.push_back(nickname);
+				message._parameters.push_back(*itChannelName);
+				message._trailing = "Cannot join channel (+k)";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue ;
+			}
+			if (channel->isModeOn(MODE_INVITE_ONLY))
+			{
+				if (!channel->isInvitedClient(sessionIndex))
+				{
+				message._command = "473";
+				message._parameters.push_back(nickname);
+				message._parameters.push_back(*itChannelName);
+				message._trailing = "Cannot join channel (+i)";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue ;
+				}
+				else
+				{
+					channel->removeInvitedClient(sessionIndex);
+				}
+			}
+			if (channel->isModeOn(MODE_LIMIT) && channel->isLimitOver())
+			{
+				message._command = "471";
+				message._parameters.push_back(nickname);
+				message._parameters.push_back(*itChannelName);
+				message._trailing = "Cannot join channel (+l)";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue ;
+			}
+		}
+
+		_channelManager.enterClient(*channel, client);
+		
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "JOIN";
 		message._parameters.push_back(*itChannelName);
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
+
+		std::string topic = channel->getTopic();
+		if (topic != "")
+		{
+			memset(&message, 0, sizeof(IRCMessage));
+			message._command = "332";
+			message._parameters.push_back(nickname);
+			message._parameters.push_back(*itChannelName);
+			message._trailing = topic;
+			res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+		}
 
 		memset(&message, 0, sizeof(IRCMessage));
 		message._command = "353";
@@ -479,10 +555,6 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 		broadcastChannel(channelName, res);
 	}
 }
-
-#include <ctime>
-#include <sstream>
-#include <iostream>
 
 void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 {
