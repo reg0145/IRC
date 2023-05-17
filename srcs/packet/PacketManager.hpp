@@ -28,6 +28,7 @@ class PacketManager
 		void processNotice(int sessionIndex, IRCMessage &req);
 		void processQuit(int sessionIndex, IRCMessage &req);
 		void processMode(int sessionIndex, IRCMessage &req);
+		void processInvite(int sessionIndex, IRCMessage &req);
 
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 
