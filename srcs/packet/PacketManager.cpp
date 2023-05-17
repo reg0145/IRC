@@ -484,11 +484,12 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 	IRCMessage message;
 	Client *client = _clientManager.getClient(sessionIndex);
 	std::string nickname = client->getNickname();
+
 	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return ;
 	}
-	if (req._parameters.size() < 1)
+	if (req._parameters.size() != 1)
 	{
 		message._command = "461";
 		message._trailing = "Not enough parameters";
@@ -497,11 +498,12 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 	Channel *channel = _channelManager.getChannel(req._parameters[0]);
+	std::string channelName = channel->getChannelName();
 	if(!channel)
 	{
 		message._command = "403";
 		message._parameters.push_back(nickname);
-		message._parameters.push_back(req._parameters[0]);
+		message._parameters.push_back(channelName);
 		message._trailing = "No such channel";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
@@ -511,7 +513,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 	{
 		message._command = "442";
 		message._parameters.push_back(nickname);
-		message._parameters.push_back(req._parameters[0]);
+		message._parameters.push_back(channelName);
 		message._trailing = "You're not on that channel";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
@@ -520,7 +522,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 	if (!channel->isOperator(nickname))
 	{
 		message._command = "482";
-		message._parameters.push_back(req._parameters[0]);
+		message._parameters.push_back(channelName);
 		message._trailing = "You're not channel operator";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
@@ -532,7 +534,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		message._prefix = nickname;
 		message._command = "332";
 		message._parameters.push_back(nickname);
-		message._parameters.push_back(req._parameters[0]);
+		message._parameters.push_back(channelName);
 		message._trailing = req._trailing;
 		std::string res = message.toString();
 		broadcastChannelWithoutMe(sessionIndex, channel, res);
@@ -544,7 +546,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		{
 			message._command = "331";
 			message._parameters.push_back(nickname);
-			message._parameters.push_back(req._parameters[0]);
+			message._parameters.push_back(channelName);
 			message._trailing = "No topic is set";
 			std::string res = message.toString();
 				_sendPacketFunc(sessionIndex, res);
@@ -554,7 +556,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 
 	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 	message._command = "TOPIC";
-	message._parameters.push_back(req._parameters[0]);
+	message._parameters.push_back(channelName);
 	message._trailing = req._trailing;
 	std::string res = message.toString();
 	_sendPacketFunc(sessionIndex, res);
