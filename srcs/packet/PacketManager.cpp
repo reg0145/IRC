@@ -16,6 +16,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
 	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
+	_recvFuntionDictionary["KICK"] = &PacketManager::processKick;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -369,7 +370,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
-		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
+		if (!channel->isClientInChannel(nickname))
 		{
 			message._command = "442";
 			message._parameters.push_back(nickname);
@@ -390,6 +391,90 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 
 		_sendPacketFunc(sessionIndex, res);
 		broadcastChannel(*itChannelName, res);
+	}
+}
+
+void PacketManager::processKick(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+
+	if (req._parameters.size() != 2)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::string nickname = client->getNickname();
+	std::string channelName = req._parameters[0];
+	Channel* channel = _channelManager.getChannel(channelName);
+	if (!channel)
+	{
+		message._command = "403";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "No such channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	if (!channel->isClientInChannel(nickname))
+	{
+		message._command = "442";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not on that channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	if (!channel->isOperator(nickname))
+	{
+		message._command = "482";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not channel operator";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::list<std::string> targetNames = IRCMessage::split(req._parameters[1], ",");
+	std::list<std::string>::iterator itTargetName;
+	for (itTargetName = targetNames.begin(); itTargetName != targetNames.end(); itTargetName++)
+	{
+		memset(&message, 0, sizeof(IRCMessage));
+		Client* target = _clientManager.getClientByNickname(*itTargetName);
+		if (!channel->isClientInChannel(*itTargetName))
+		{
+			message._command = "441";
+			message._parameters.push_back(channelName);
+			message._parameters.push_back(*itTargetName);
+			message._trailing = "They aren't on that channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+
+		_channelManager.leaveClient(*channel, target);
+
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "KICK";
+		message._parameters.push_back(channelName);
+		message._parameters.push_back(*itTargetName);
+		message._trailing = req._trailing.size() ? req._trailing : "Kicked";
+		std::string res = message.toString();
+
+		_sendPacketFunc(target->getSessionIndex(), res);
+		broadcastChannel(channelName, res);
 	}
 }
 
