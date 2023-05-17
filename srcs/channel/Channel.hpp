@@ -20,7 +20,6 @@ class Channel
 		void removeOperator(std::string nickname);
 
 		bool isOperator(std::string nickname);
-		bool isClientInChannel(std::string nickname);
 		bool isModeOn(int mode);
 		bool isLimitOver();
 		bool isPasswordTrue(std::string password);
@@ -37,15 +36,13 @@ class Channel
 		std::string &getChannelName();
 		int getClientCount();
 		std::map<std::string, Client*> &getClients();
-		void setTopic(std::string topic);
 
 	private:
 		std::string _channelName;
-		std::string	_topic;
-		std::list<std::string> _operator;
-		std::map<std::string, Client*> _clients;
 		std::string _topic;
 		std::string _password;
+		std::list<std::string> _operator;
+		std::map<std::string, Client*> _clients;
 		unsigned long _limit;
 		int _mode;
 };
