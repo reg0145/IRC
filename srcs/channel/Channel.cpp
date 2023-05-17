@@ -102,7 +102,7 @@ std::map<std::string, Client*> &Channel::getClients()
 
 bool Channel::isModeOn(int mode)
 {
-	return _mode & mode;
+	return _mode & mode ? true : false;
 }
 
 void Channel::setMode(int mode)
