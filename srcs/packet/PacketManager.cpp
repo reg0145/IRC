@@ -544,6 +544,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		message._hasTrailing = req._hasTrailing;
 		std::string res = message.toString();
 		broadcastChannelWithoutMe(sessionIndex, channel, res);
+		
 		memset(&message, 0, sizeof(IRCMessage));
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "333";
