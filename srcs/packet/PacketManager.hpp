@@ -2,7 +2,6 @@
 #define PACKETMANAGER_HPP
 
 #include <map>
-#include <sys/socket.h>
 #include "../packet/Packet.hpp"
 #include "../message/IRCMessage.hpp"
 #include "../channel/ChannelManager.hpp"
@@ -28,6 +27,7 @@ class PacketManager
 		void processPrivmsg(int sessionIndex, IRCMessage &req);
 		void processNotice(int sessionIndex, IRCMessage &req);
 		void processQuit(int sessionIndex, IRCMessage &req);
+		void processMode(int sessionIndex, IRCMessage &req);
 
 		static void(*_sendPacketFunc)(int sessionIndex, std::string &res);
 

@@ -56,6 +56,27 @@ bool ChannelManager::isValidChannelName(std::string channelName)
 	return true;
 }
 
+bool ChannelManager::isValidChannelLimit(std::string &channelLimit)
+{
+	char *end;
+	long limit = strtol(channelLimit.c_str(), &end, 10);
+
+	if (limit < 1 || limit > INT_MAX || *end != '\0')
+	{
+		return false;
+	}
+
+	return true;
+}
+bool ChannelManager::isValidChannelPassword(std::string &channelPassword)
+{
+	if (channelPassword.size() > 20)
+	{
+		return false;
+	}
+	return true;
+}
+
 void ChannelManager::changeNickname(Client* client, std::string oldNickname, std::string newNickname)
 {
 	std::set<std::string>::iterator itChannelName;

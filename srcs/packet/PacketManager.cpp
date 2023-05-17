@@ -1,5 +1,4 @@
 #include "PacketManager.hpp"
-#include <iostream>
 
 void (*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 
@@ -17,6 +16,8 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
 	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
+	_recvFuntionDictionary["KICK"] = &PacketManager::processKick;
+	_recvFuntionDictionary["MODE"] = &PacketManager::processMode;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -210,19 +211,37 @@ void PacketManager::processUser(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
 
-	if (_clientManager.isUnRegistedClient(sessionIndex))
+	/* 인증 확인 */
+	if (_clientManager.isFailedPass(sessionIndex))
 	{
-		//sendPacketFunc();
+		message._command = "ERROR";
+		message._trailing = "Authentication failed";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
 
+	/* 파라미터 부족 확인 */
 	if (req._parameters.size() != 3)
 	{
-		//sendPacketFunc();
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
 
+	/* USER 재등록 확인 */
 	Client* client = _clientManager.getClient(sessionIndex);
+	if (client->getUsername() != "")
+	{
+		message._command = "462";
+		message._trailing = "You may not reregister";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
 	client->setUsername(req._parameters[0]);
 	client->setHostname(req._parameters[1]);
 	client->setServername(req._parameters[2]);
@@ -341,7 +360,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
 		Channel* channel = _channelManager.getChannel(*itChannelName);
-	
+
 		if (!channel)
 		{
 			message._command = "403";
@@ -352,7 +371,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 			continue ;
 		}
-		if (!_clientManager.isJoinedChannel(sessionIndex, *itChannelName))
+		if (!channel->isClientInChannel(nickname))
 		{
 			message._command = "442";
 			message._parameters.push_back(nickname);
@@ -373,6 +392,90 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 
 		_sendPacketFunc(sessionIndex, res);
 		broadcastChannel(*itChannelName, res);
+	}
+}
+
+void PacketManager::processKick(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client* client = _clientManager.getClient(sessionIndex);
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+
+	if (req._parameters.size() != 2)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::string nickname = client->getNickname();
+	std::string channelName = req._parameters[0];
+	Channel* channel = _channelManager.getChannel(channelName);
+	if (!channel)
+	{
+		message._command = "403";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "No such channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	if (!channel->isClientInChannel(nickname))
+	{
+		message._command = "442";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not on that channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	if (!channel->isOperator(nickname))
+	{
+		message._command = "482";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not channel operator";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::list<std::string> targetNames = IRCMessage::split(req._parameters[1], ",");
+	std::list<std::string>::iterator itTargetName;
+	for (itTargetName = targetNames.begin(); itTargetName != targetNames.end(); itTargetName++)
+	{
+		memset(&message, 0, sizeof(IRCMessage));
+		Client* target = _clientManager.getClientByNickname(*itTargetName);
+		if (!channel->isClientInChannel(*itTargetName))
+		{
+			message._command = "441";
+			message._parameters.push_back(channelName);
+			message._parameters.push_back(*itTargetName);
+			message._trailing = "They aren't on that channel";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			continue ;
+		}
+
+		_channelManager.leaveClient(*channel, target);
+
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "KICK";
+		message._parameters.push_back(channelName);
+		message._parameters.push_back(*itTargetName);
+		message._trailing = req._trailing.size() ? req._trailing : "Kicked";
+		std::string res = message.toString();
+
+		_sendPacketFunc(target->getSessionIndex(), res);
+		broadcastChannel(channelName, res);
 	}
 }
 
@@ -626,4 +729,233 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 	_clientManager.removeClient(sessionIndex);
 
 	std::cout << ">> client[" << sessionIndex << "] Disconnected <<" << std::endl;
+}
+
+void PacketManager::processMode(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return;
+	}
+
+	/* 파라미터 개수 확인 */
+	if (req._parameters.size() < 2)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::string channelName = req._parameters[0];
+	std::string channelMode = req._parameters[1];
+
+	Client* client = _clientManager.getClient(sessionIndex);
+	std::string nickname = client->getNickname();
+	/* MODE <username> 명령어 처리하지 않음 */
+	if (nickname == channelName)
+	{
+		return ;
+	}
+
+	/* 설정할 채널이 생성되었는지 확인 */
+	Channel* channel = _channelManager.getChannel(channelName);
+	if (!channel)
+	{
+		message._command = "403";
+		message._parameters.push_back(channelName);
+		message._trailing = "No such channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 요청 클라이언트가 채널에 속해있는지 확인 */
+	if (!channel->isClientInChannel(nickname))
+	{
+		message._command = "442";
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not on that channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 요청 클라이언트가 채널 운영자인지 확인 */
+	if (!channel->isOperator(nickname))
+	{
+		message._command = "482";
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not channel operator";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 처리 가능한 Mode인지 확인*/
+	if ((channelMode.length() != 2) ||
+		!(channelMode[0] == '+' || channelMode[0] == '-'))
+	{
+		message._command = "472";
+		message._parameters.push_back(channelMode);
+		message._trailing = "is unknown mode char to me";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	char sign = channelMode[0];
+	char mode = channelMode[1];
+
+	switch (mode)
+	{
+		case 'i' :
+			if (sign == '+')
+			{
+				channel->setMode(MODE_INVITE_ONLY);
+			}
+			else
+			{
+				channel->unSetMode(MODE_INVITE_ONLY);
+			}
+			break;
+		case 't' :
+			if (sign == '+')
+			{
+				channel->setMode(MODE_TOPIC);
+			}
+			else
+			{
+				channel->unSetMode(MODE_TOPIC);
+			}
+			break;
+		case 'k' :
+			if (sign == '+')
+			{
+				if (req._parameters.size() < 3)
+				{
+					message._command = "461";
+					message._trailing = "Not enough parameters";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+
+				if (!_channelManager.isValidChannelPassword(req._parameters[2]))
+				{
+					message._command = "475";
+					message._parameters.push_back(channelName);
+					message._trailing = "Cannot join channel (+k)";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+
+				channel->setMode(MODE_PASSWORD);
+				channel->setPassword(req._parameters[2]);
+
+				/* 채널 사용자들에게는 KEY값 없이 알림 */
+				message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+				message._command = req._command;
+				message._parameters.push_back(req._parameters[1]);
+				std::string res = message.toString();
+				broadcastChannelWithoutMe(sessionIndex, channel, res);
+
+				/* 채널 운영자에게는 KEY값 포함 알림 */
+				message._parameters.push_back(req._parameters[2]);
+				res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				return ;
+			}
+			else
+			{
+				channel->unSetMode(MODE_PASSWORD);
+				channel->setPassword("");
+			}
+			break;
+		case 'o' :
+			if (req._parameters.size() < 3)
+			{
+				message._command = "461";
+				message._trailing = "Not enough parameters";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				return ;
+			}
+
+			if (!channel->isClientInChannel(req._parameters[2]))
+			{
+				message._command = "442";
+				message._parameters.push_back(channelName);
+				message._trailing = "You're not on that channel";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				return ;
+			}
+
+			if (sign == '+')
+			{
+				if (channel->isOperator(req._parameters[2]))
+				{
+					return ;
+				}
+				channel->addOperator(req._parameters[2]);
+			}
+			else
+			{
+				if (!channel->isOperator(req._parameters[2]))
+				{
+					return ;
+				}
+				channel->removeOperator(req._parameters[2]);
+			}
+			break;
+		case 'l' :
+			if (sign == '+')
+			{
+				if (req._parameters.size() < 3)
+				{
+					message._command = "461";
+					message._trailing = "Not enough parameters";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+
+				if (!_channelManager.isValidChannelLimit(req._parameters[2]))
+				{
+					message._command = "472";
+					message._parameters.push_back(channelMode);
+					message._trailing = "is unknown mode char to me";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+
+				channel->setMode(MODE_LIMIT);
+				channel->setLimit(req._parameters[2]);
+			}
+			else
+			{
+				channel->unSetMode(MODE_LIMIT);
+				channel->setLimit("0");
+			}
+			break;
+		default :
+			message._command = "472";
+			message._parameters.push_back(channelMode);
+			message._trailing = "is unknown mode char to me";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			return ;
+	}
+
+	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+	message._command = req._command;
+	message._parameters = req._parameters;
+	std::string res = message.toString();
+	broadcastChannel(channelName, res);
 }
