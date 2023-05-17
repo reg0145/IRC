@@ -549,10 +549,6 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 	}
 }
 
-#include <ctime>
-#include <sstream>
-#include <iostream>
-
 void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
