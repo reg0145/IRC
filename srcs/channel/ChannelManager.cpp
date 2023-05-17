@@ -61,7 +61,7 @@ bool ChannelManager::isValidChannelLimit(std::string &channelLimit)
 	char *end;
 	long limit = strtol(channelLimit.c_str(), &end, 10);
 
-	if (limit < 0 || limit > INT_MAX || *end != '\0')
+	if (limit < 1 || limit > INT_MAX || *end != '\0')
 	{
 		return false;
 	}

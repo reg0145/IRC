@@ -5,9 +5,8 @@ Channel::Channel(std::string channelName)
 	_channelName = channelName;
 	_topic = "";
 	_password = "";
-	_isInvite = false;
-	_isTopic = false;
 	_limit = 0;
+	_mode = 0;
 }
 
 Channel::~Channel()
@@ -101,32 +100,19 @@ std::map<std::string, Client*> &Channel::getClients()
 	return _clients;
 }
 
-bool Channel::isSetPassword()
+bool Channel::isModeOn(int mode)
 {
-	if (_password == "")
-	{
-		return false;
-	}
-	return true;
+	return _mode & mode;
 }
 
-bool Channel::isSetTopic()
+void Channel::setMode(int mode)
 {
-	return _isTopic;
+	_mode |= mode;
 }
 
-bool Channel::isSetInvite()
+void Channel::unSetMode(int mode)
 {
-	return _isInvite;
-}
-
-bool Channel::isSetLimit()
-{
-	if (_limit == 0)
-	{
-		return false;
-	}
-	return true;
+	_mode &= ~mode;
 }
 
 bool Channel::isLimitOver()
@@ -147,21 +133,6 @@ bool Channel::isPasswordTrue(std::string password)
 	return true;
 }
 
-void Channel::setIsInvite(bool isInvite)
-{
-	_isInvite = isInvite;
-}
-
-void Channel::setIsTopic(bool isTopic)
-{
-	_isTopic = isTopic;
-}
-
-void Channel::setPassword(std::string password)
-{
-	_password = password;
-}
-
 void Channel::setTopic(std::string topic)
 {
 	_topic = topic;
@@ -170,4 +141,9 @@ void Channel::setTopic(std::string topic)
 void Channel::setLimit(std::string limit)
 {
 	_limit = std::stol(limit);
+}
+
+void Channel::setPassword(std::string password)
+{
+	_password = password;
 }

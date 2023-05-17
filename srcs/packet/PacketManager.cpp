@@ -733,21 +733,21 @@ void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 		case 'i' :
 			if (sign == '+')
 			{
-				channel->setIsInvite(true);
+				channel->setMode(MODE_INVITE_ONLY);
 			}
 			else
 			{
-				channel->setIsInvite(false);
+				channel->unSetMode(MODE_INVITE_ONLY);
 			}
 			break;
 		case 't' :
 			if (sign == '+')
 			{
-				channel->setIsTopic(true);
+				channel->setMode(MODE_TOPIC);
 			}
 			else
 			{
-				channel->setIsTopic(false);
+				channel->unSetMode(MODE_TOPIC);
 			}
 			break;
 		case 'k' :
@@ -771,6 +771,8 @@ void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 					_sendPacketFunc(sessionIndex, res);
 					return ;
 				}
+
+				channel->setMode(MODE_PASSWORD);
 				channel->setPassword(req._parameters[2]);
 
 				/* 채널 사용자들에게는 KEY값 없이 알림 */
@@ -788,6 +790,7 @@ void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 			}
 			else
 			{
+				channel->unSetMode(MODE_PASSWORD);
 				channel->setPassword("");
 			}
 			break;
@@ -850,10 +853,12 @@ void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 					return ;
 				}
 
+				channel->setMode(MODE_LIMIT);
 				channel->setLimit(req._parameters[2]);
 			}
 			else
 			{
+				channel->unSetMode(MODE_LIMIT);
 				channel->setLimit("0");
 			}
 			break;
