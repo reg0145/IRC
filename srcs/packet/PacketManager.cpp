@@ -373,6 +373,18 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
 
+		std::string topic = channel->getTopic();
+		if (topic != "")
+		{
+			memset(&message, 0, sizeof(IRCMessage));
+			message._command = "332";
+			message._parameters.push_back(nickname);
+			message._parameters.push_back(*itChannelName);
+			message._trailing = topic;
+			res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+		}
+
 		memset(&message, 0, sizeof(IRCMessage));
 		message._command = "353";
 		message._parameters.push_back(nickname);
