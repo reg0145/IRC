@@ -535,7 +535,8 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		message._command = "332";
 		message._parameters.push_back(nickname);
 		message._parameters.push_back(channelName);
-		message._trailing = req._trailing.size() ? req._trailing : " :";
+		message._trailing = req._trailing;
+		message._hasTrailing = req._hasTrailing;
 		std::string res = message.toString();
 		broadcastChannelWithoutMe(sessionIndex, channel, res);
 	}
@@ -558,7 +559,8 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 	message._command = "TOPIC";
 	message._parameters.push_back(channelName);
-	message._trailing = req._trailing.size() ? req._trailing : " :";
+	message._trailing = req._trailing;
+	message._hasTrailing = req._hasTrailing;
 	std::string res = message.toString();
 	_sendPacketFunc(sessionIndex, res);
 }

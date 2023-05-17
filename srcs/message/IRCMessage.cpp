@@ -83,7 +83,7 @@ std::string IRCMessage::toString()
 		oss << " " << _parameters[i];
 	}
 
-	if (_trailing != "")
+	if (_trailing != "" || _hasTrailing)
 	{
 		oss << " :" << _trailing;
 	}
