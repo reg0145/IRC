@@ -491,8 +491,6 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 	if (req._parameters.size() < 1)
 	{
 		message._command = "461";
-		message._parameters.push_back(nickname);
-		message._parameters.push_back("TOPIC");
 		message._trailing = "Not enough parameters";
 		std::string res = message.toString();
 		_sendPacketFunc(sessionIndex, res);
