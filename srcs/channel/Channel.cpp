@@ -117,7 +117,7 @@ void Channel::unSetMode(int mode)
 
 bool Channel::isLimitOver()
 {
-	if (_clients.size() > _limit)
+	if (_clients.size() < _limit)
 	{
 		return false;
 	}
