@@ -25,7 +25,6 @@ class Client
 
 		bool getIsPass() const;
 		void setPassTrue();
-		void setOperatorTrue();
 		void setName(std::string name);
 		void setNickname(std::string nickname);
 		void setUsername(std::string username);

@@ -379,7 +379,8 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
-	std::string nickname = _clientManager.getClient(sessionIndex)->getNickname();
+	Client *client = _clientManager.getClient(sessionIndex);
+	std::string nickname = client->getNickname();
 	if (_clientManager.isUnRegistedClient(sessionIndex))
 	{
 		return ;
@@ -426,31 +427,34 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 	}
 	if (req._hasTrailing)
 	{
-		std::cout << "setTopic" <<std::endl;
 		channel->setTopic(req._trailing);
 		message._prefix = nickname;
-		message._command = "TOPIC";
+		message._command = "332";
+		message._parameters.push_back(nickname);
 		message._parameters.push_back(req._parameters[0]);
 		message._trailing = req._trailing;
 		std::string res = message.toString();
-		broadcastChannel(req._parameters[0], res);
-		return ;
+		broadcastChannelWithoutMe(sessionIndex, channel, res);
 	}
-	std::string topic = channel->getTopic();
-	if (topic == "")
+	else
 	{
-		message._command = "331";
-		message._parameters.push_back(nickname);
-		message._parameters.push_back(req._parameters[0]);
-		message._trailing = "No topic is set";
-		std::string res = message.toString();
-			_sendPacketFunc(sessionIndex, res);
-		return;
+		std::string topic = channel->getTopic();
+		if (topic == "")
+		{
+			message._command = "331";
+			message._parameters.push_back(nickname);
+			message._parameters.push_back(req._parameters[0]);
+			message._trailing = "No topic is set";
+			std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+			return;
+		}
 	}
-	message._command = "332";
-	message._parameters.push_back(nickname);
+
+	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+	message._command = "TOPIC";
 	message._parameters.push_back(req._parameters[0]);
-	message._trailing = topic;
+	message._trailing = req._trailing;
 	std::string res = message.toString();
 	_sendPacketFunc(sessionIndex, res);
 }
