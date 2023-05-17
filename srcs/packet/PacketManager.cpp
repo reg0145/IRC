@@ -689,7 +689,7 @@ void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	/* 요청한 클라이언트가 채널에 속해있는지 확인 */
+	/* 요청 클라이언트가 채널에 속해있는지 확인 */
 	if (!channel->isClientInChannel(nickname))
 	{
 		message._command = "442";
