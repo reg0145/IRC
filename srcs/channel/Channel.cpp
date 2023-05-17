@@ -3,8 +3,6 @@
 Channel::Channel(std::string channelName)
 {
 	_channelName = channelName;
-	_topic = "";
-	_password = "";
 	_limit = 0;
 	_mode = 0;
 }
@@ -49,6 +47,16 @@ void Channel::removeOperator(std::string nickname)
 	_operator.remove(nickname);
 }
 
+void Channel::addInvitedClient(int sessionIndex)
+{
+	_invitedClients.insert(sessionIndex);
+}
+
+void Channel::removeInvitedClient(int sessionIndex)
+{
+	_invitedClients.erase(sessionIndex);
+}
+
 bool Channel::isOperator(std::string nickname)
 {
 	std::list<std::string>::iterator it;
@@ -60,6 +68,39 @@ bool Channel::isOperator(std::string nickname)
 		}
 	}
 	return false;
+}
+
+bool Channel::isModeOn(int mode)
+{
+	return _mode & mode ? true : false;
+}
+
+bool Channel::isLimitOver()
+{
+	if (_clients.size() > _limit)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool Channel::isPasswordTrue(std::string password)
+{
+	if (_password != password)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool Channel::isInvitedClient(int sessionIndex)
+{
+	std::set<int>::iterator itFind = _invitedClients.find(sessionIndex);
+	if (itFind == _invitedClients.end())
+	{
+		return false;
+	}
+	return true;
 }
 
 bool Channel::isClientInChannel(std::string nickname)
@@ -90,6 +131,11 @@ std::string &Channel::getChannelName()
 	return _channelName;
 }
 
+std::string Channel::getTopic()
+{
+	return _topic;
+}
+
 int Channel::getClientCount()
 {
 	return _clients.size();
@@ -98,11 +144,6 @@ int Channel::getClientCount()
 std::map<std::string, Client*> &Channel::getClients()
 {
 	return _clients;
-}
-
-bool Channel::isModeOn(int mode)
-{
-	return _mode & mode ? true : false;
 }
 
 void Channel::setMode(int mode)
@@ -117,7 +158,7 @@ void Channel::unSetMode(int mode)
 
 bool Channel::isLimitOver()
 {
-	if (_clients.size() < _limit)
+	if (_clients.size() > _limit)
 	{
 		return false;
 	}

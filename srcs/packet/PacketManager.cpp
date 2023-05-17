@@ -12,11 +12,13 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["PING"] = &PacketManager::processPing;
 	_recvFuntionDictionary["JOIN"] = &PacketManager::processJoin;
 	_recvFuntionDictionary["PART"] = &PacketManager::processPart;
+	_recvFuntionDictionary["TOPIC"] = &PacketManager::processTopic;
 	_recvFuntionDictionary["PRIVMSG"] = &PacketManager::processPrivmsg;
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
 	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
 	_recvFuntionDictionary["KICK"] = &PacketManager::processKick;
 	_recvFuntionDictionary["MODE"] = &PacketManager::processMode;
+	_recvFuntionDictionary["INVITE"] = &PacketManager::processInvite;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -525,6 +527,109 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 	}
 }
 
+#include <ctime>
+#include <sstream>
+#include <iostream>
+
+void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+	Client *client = _clientManager.getClient(sessionIndex);
+	std::string nickname = client->getNickname();
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+	if (req._parameters.size() != 1)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	Channel *channel = _channelManager.getChannel(req._parameters[0]);
+	std::string channelName = channel->getChannelName();
+	if(!channel)
+	{
+		message._command = "403";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "No such channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	if (!channel->isClientInChannel(nickname))
+	{
+		message._command = "442";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not on that channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	
+	if (channel->isModeOn(MODE_TOPIC) && !channel->isOperator(nickname))
+	{
+		message._command = "482";
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not channel operator";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+	if (req._hasTrailing)
+	{
+		channel->setTopic(req._trailing);
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "332";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._trailing = req._trailing;
+		message._hasTrailing = req._hasTrailing;
+		std::string res = message.toString();
+		broadcastChannelWithoutMe(sessionIndex, channel, res);
+		
+		memset(&message, 0, sizeof(IRCMessage));
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "333";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._parameters.push_back(nickname);
+		std::ostringstream oss;
+		oss << std::time(0);
+		message._parameters.push_back(oss.str());
+		res = message.toString();
+		broadcastChannelWithoutMe(sessionIndex, channel, res);
+	}
+	else
+	{
+		std::string topic = channel->getTopic();
+		if (topic == "")
+		{
+			message._command = "331";
+			message._parameters.push_back(nickname);
+			message._parameters.push_back(channelName);
+			message._trailing = "No topic is set";
+			std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+			return;
+		}
+	}
+	memset(&message, 0, sizeof(IRCMessage));
+
+	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+	message._command = "TOPIC";
+	message._parameters.push_back(channelName);
+	message._trailing = req._trailing;
+	message._hasTrailing = req._hasTrailing;
+	std::string res = message.toString();
+	_sendPacketFunc(sessionIndex, res);
+}
+
 void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
@@ -921,4 +1026,99 @@ void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 	message._parameters = req._parameters;
 	std::string res = message.toString();
 	broadcastChannel(channelName, res);
+}
+
+void PacketManager::processInvite(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+
+	/* 유저 등록 확인*/
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return ;
+	}
+
+	/* 파라미터 개수 확인 */
+	if (req._parameters.size() != 2)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::string inviteNickname = req._parameters[0];
+	std::string inviteChannelName = req._parameters[1];
+
+	/* 초대한 채널이 존재하는지 확인 */
+	Channel* inviteChannel = _channelManager.getChannel(inviteChannelName);
+	if (!inviteChannel)
+	{
+		message._command = "403";
+		message._parameters.push_back(inviteChannelName);
+		message._trailing = "No such channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 초대자(inviter)가 채널에 속해있는지 확인 */
+	Client* inviterClient = _clientManager.getClient(sessionIndex);
+	std::string inviterNickname = inviterClient->getNickname();
+	if (!inviteChannel->isClientInChannel(inviterNickname))
+	{
+		message._command = "442";
+		message._parameters.push_back(inviteChannelName);
+		message._trailing = "You're not on that channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 초대자(inviter)가 채널 운영자인지 확인 */
+	if (!inviteChannel->isOperator(inviterNickname))
+	{
+		message._command = "482";
+		message._parameters.push_back(inviteChannelName);
+		message._trailing = "You're not channel operator";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 초대한 클라이언트가 존재하는지 확인 */
+	Client* inviteClient = _clientManager.getClientByNickname(inviteNickname);
+	if (!inviteClient)
+	{
+		message._command = "401";
+		message._parameters.push_back(inviteNickname);
+		message._trailing = "No such nick";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 초대한 클라이언트가 이미 채널에 속해있는지 확인 */
+	if (inviteChannel->isClientInChannel(inviteNickname))
+	{
+		message._command = "443";
+		message._parameters.push_back(inviteNickname);
+		message._trailing = "is already on channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	inviteChannel->addInvitedClient(inviteClient->getSessionIndex());
+
+	message._prefix = inviterNickname + "!" + inviterClient->getUsername() + "@" + inviterClient->getServername();
+	message._command = "INVITE";
+	message._parameters.push_back(inviterNickname);
+	message._trailing = inviteChannelName;
+	std::string res = message.toString();
+	/* 초대한 클라이언트에게 메시지 전송 */
+	_sendPacketFunc(inviteClient->getSessionIndex(), res);
+	/* 초대자(inviter)에게 메시지 전송*/
+	_sendPacketFunc(sessionIndex, res);
 }
