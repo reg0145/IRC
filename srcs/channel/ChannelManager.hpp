@@ -13,7 +13,7 @@ class ChannelManager
 		ChannelManager();
 		~ChannelManager();
 
-		void enterClient(std::string channelName, Client* client);
+		void enterClient(Channel &channel, Client* client);
 		void leaveClient(Channel &channel, Client* client);
 		bool isValidChannelName(std::string channelName);
 		bool isValidChannelLimit(std::string &channelLimit);

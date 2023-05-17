@@ -365,7 +365,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			}
 		}
 
-		_channelManager.enterClient(*itChannelName, client);
+		_channelManager.enterClient(*channel, client);
 		
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "JOIN";

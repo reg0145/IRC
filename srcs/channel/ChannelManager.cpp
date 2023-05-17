@@ -17,12 +17,10 @@ Channel* ChannelManager::createChannel(std::string channelName)
 	return getChannel(channelName);
 }
 
-void ChannelManager::enterClient(std::string channelName, Client* client)
+void ChannelManager::enterClient(Channel &channel, Client* client)
 {
-	Channel* channel = getChannel(channelName);
-
-	channel->addClient(client);
-	client->addChannel(channelName);
+	channel.addClient(client);
+	client->addChannel(channel.getChannelName());
 }
 
 void ChannelManager::leaveClient(Channel &channel, Client* client)
