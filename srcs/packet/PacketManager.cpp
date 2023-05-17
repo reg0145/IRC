@@ -17,6 +17,7 @@ void PacketManager::init(char* password)
 	_recvFuntionDictionary["NOTICE"] = &PacketManager::processNotice;
 	_recvFuntionDictionary["QUIT"] = &PacketManager::processQuit;
 	_recvFuntionDictionary["KICK"] = &PacketManager::processKick;
+	_recvFuntionDictionary["MODE"] = &PacketManager::processMode;
 }
 
 void PacketManager::process(int sessionIndex, IRCMessage &message)
@@ -645,4 +646,229 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 	_clientManager.removeClient(sessionIndex);
 
 	std::cout << ">> client[" << sessionIndex << "] Disconnected <<" << std::endl;
+}
+
+#include <iostream>
+void PacketManager::processMode(int sessionIndex, IRCMessage &req)
+{
+	IRCMessage message;
+
+	if (_clientManager.isUnRegistedClient(sessionIndex))
+	{
+		return;
+	}
+
+	/* 파라미터 개수 확인 */
+	if (req._parameters.size() < 2)
+	{
+		message._command = "461";
+		message._trailing = "Not enough parameters";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	std::string channelName = req._parameters[0];
+	std::string channelMode = req._parameters[1];
+
+	Client* client = _clientManager.getClient(sessionIndex);
+	std::string nickname = client->getNickname();
+	/* MODE <username> 명령어 처리하지 않음 */
+	if (nickname == channelName)
+	{
+		return ;
+	}
+
+	/* 설정할 채널이 생성되었는지 확인 */
+	Channel* channel = _channelManager.getChannel(channelName);
+	if (!channel)
+	{
+		message._command = "403";
+		message._parameters.push_back(channelName);
+		message._trailing = "No such channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 요청한 클라이언트가 채널에 속해있는지 확인 */
+	if (!channel->isClientInChannel(nickname))
+	{
+		message._command = "442";
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not on that channel";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 요청 클라이언트가 채널 운영자인지 확인 */
+	if (!channel->isOperator(nickname))
+	{
+		message._command = "482";
+		message._parameters.push_back(channelName);
+		message._trailing = "You're not channel operator";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	/* 처리 가능한 Mode인지 확인*/
+	if ((channelMode.length() != 2) ||
+		!(channelMode[0] == '+' || channelMode[0] == '-'))
+	{
+		message._command = "472";
+		message._parameters.push_back(channelMode);
+		message._trailing = "is unknown mode char to me";
+		std::string res = message.toString();
+		_sendPacketFunc(sessionIndex, res);
+		return ;
+	}
+
+	char sign = channelMode[0];
+	char mode = channelMode[1];
+
+	switch (mode)
+	{
+		case 'i' :
+			if (sign == '+')
+			{
+				channel->setIsInvite(true);
+			}
+			else
+			{
+				channel->setIsInvite(false);
+			}
+			break;
+		case 't' :
+			if (sign == '+')
+			{
+				channel->setIsTopic(true);
+			}
+			else
+			{
+				channel->setIsTopic(false);
+			}
+			break;
+		case 'k' :
+			if (sign == '+')
+			{
+				if (req._parameters.size() < 3)
+				{
+					message._command = "461";
+					message._trailing = "Not enough parameters";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+
+				if (!_channelManager.isValidChannelPassword(req._parameters[2]))
+				{
+					message._command = "475";
+					message._parameters.push_back(channelName);
+					message._trailing = "Cannot join channel (+k)";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+				channel->setPassword(req._parameters[2]);
+
+				/* 채널 사용자들에게는 KEY값 없이 알림 */
+				message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+				message._command = req._command;
+				message._parameters.push_back(req._parameters[1]);
+				std::string res = message.toString();
+				broadcastChannelWithoutMe(sessionIndex, channel, res);
+
+				/* 채널 운영자에게는 KEY값 포함 알림 */
+				message._parameters.push_back(req._parameters[2]);
+				res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				return ;
+			}
+			else
+			{
+				channel->setPassword("");
+			}
+			break;
+		case 'o' :
+			if (req._parameters.size() < 3)
+			{
+				message._command = "461";
+				message._trailing = "Not enough parameters";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				return ;
+			}
+
+			if (!channel->isClientInChannel(req._parameters[2]))
+			{
+				message._command = "442";
+				message._parameters.push_back(channelName);
+				message._trailing = "You're not on that channel";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				return ;
+			}
+
+			if (sign == '+')
+			{
+				if (channel->isOperator(req._parameters[2]))
+				{
+					return ;
+				}
+				channel->addOperator(req._parameters[2]);
+			}
+			else
+			{
+				if (!channel->isOperator(req._parameters[2]))
+				{
+					return ;
+				}
+				channel->removeOperator(req._parameters[2]);
+			}
+			break;
+		case 'l' :
+			if (sign == '+')
+			{
+				if (req._parameters.size() < 3)
+				{
+					message._command = "461";
+					message._trailing = "Not enough parameters";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+
+				if (!_channelManager.isValidChannelLimit(req._parameters[2]))
+				{
+					message._command = "472";
+					message._parameters.push_back(channelMode);
+					message._trailing = "is unknown mode char to me";
+					std::string res = message.toString();
+					_sendPacketFunc(sessionIndex, res);
+					return ;
+				}
+
+				channel->setLimit(req._parameters[2]);
+			}
+			else
+			{
+				channel->setLimit("0");
+			}
+			break;
+		default :
+			message._command = "472";
+			message._parameters.push_back(channelMode);
+			message._trailing = "is unknown mode char to me";
+			std::string res = message.toString();
+			_sendPacketFunc(sessionIndex, res);
+			return ;
+	}
+
+	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+	message._command = req._command;
+	message._parameters = req._parameters;
+	std::string res = message.toString();
+	broadcastChannel(channelName, res);
 }
