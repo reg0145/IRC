@@ -44,12 +44,16 @@ IRCMessage IRCMessage::parseMessage(const std::string &request)
 	std::string params;
 	std::string token;
 
+	size_t idx = request.find(':', 1);
+	if (idx != std::string::npos)
+	{
+		msg._hasTrailing = true;
+	}
 	if (request[0] == ':')
 	{
 		ss.ignore(1);
 		std::getline(ss, msg._prefix, ' ');
 	}
-
 	std::getline(ss, msg._command, ' ');
 
 	std::getline(ss, params, ':');
@@ -58,7 +62,6 @@ IRCMessage IRCMessage::parseMessage(const std::string &request)
 	{
 		msg._parameters.push_back(token);
 	}
-
 	std::getline(ss, msg._trailing);
 
 	return msg;
@@ -80,7 +83,7 @@ std::string IRCMessage::toString()
 		oss << " " << _parameters[i];
 	}
 
-	if (_trailing != "")
+	if (_trailing != "" || _hasTrailing)
 	{
 		oss << " :" << _trailing;
 	}

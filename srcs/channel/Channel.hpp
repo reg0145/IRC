@@ -47,6 +47,8 @@ class Channel
 		std::set<int> _invitedClients;
 		std::string _topic;
 		std::string _password;
+		std::list<std::string> _operator;
+		std::map<std::string, Client*> _clients;
 		unsigned long _limit;
 		int _mode;
 };

@@ -3,8 +3,6 @@
 Channel::Channel(std::string channelName)
 {
 	_channelName = channelName;
-	_topic = "";
-	_password = "";
 	_limit = 0;
 	_mode = 0;
 }
@@ -133,6 +131,11 @@ std::string &Channel::getChannelName()
 	return _channelName;
 }
 
+std::string Channel::getTopic()
+{
+	return _topic;
+}
+
 int Channel::getClientCount()
 {
 	return _clients.size();
@@ -141,6 +144,16 @@ int Channel::getClientCount()
 std::map<std::string, Client*> &Channel::getClients()
 {
 	return _clients;
+}
+
+void Channel::setTopic(std::string topic)
+{
+	_topic = topic;
+}
+
+bool Channel::isModeOn(int mode)
+{
+	return _mode & mode ? true : false;
 }
 
 void Channel::setMode(int mode)
@@ -153,9 +166,22 @@ void Channel::unSetMode(int mode)
 	_mode &= ~mode;
 }
 
-void Channel::setTopic(std::string topic)
+bool Channel::isLimitOver()
 {
-	_topic = topic;
+	if (_clients.size() > _limit)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool Channel::isPasswordTrue(std::string password)
+{
+	if (_password != password)
+	{
+		return false;
+	}
+	return true;
 }
 
 void Channel::setLimit(std::string limit)
