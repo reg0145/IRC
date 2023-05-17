@@ -343,6 +343,16 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 				_sendPacketFunc(sessionIndex, res);
 				continue ;
 			}
+			if (channel->isModeOn(MODE_INVITE_ONLY) && channel->isInvitedClient(sessionIndex))
+			{
+				message._command = "473";
+				message._parameters.push_back(nickname);
+				message._parameters.push_back(*itChannelName);
+				message._trailing = "Cannot join channel (+i)";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue ;
+			}
 			if (channel->isModeOn(MODE_LIMIT) && channel->isLimitOver())
 			{
 				message._command = "471";
