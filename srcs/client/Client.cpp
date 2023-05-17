@@ -6,8 +6,7 @@ Client::Client(int sessionIndex)
 	  _nickname(""),
 	  _username(""),
 	  _hostname(""),
-	  _isPass(false),
-	  _isAdmin(false)
+	  _isPass(false)
 {
 	(void)_sessionIndex;
 }
@@ -34,7 +33,6 @@ void Client::leaveClient()
 	_hostname = "";
 	_servername = "";
 	_isPass = false;
-	_isAdmin = false;
 	_channels.clear();
 }
 

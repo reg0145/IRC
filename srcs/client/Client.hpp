@@ -40,7 +40,6 @@ class Client
 		std::string _servername;
 		std::set<std::string> _channels;
 		bool _isPass;
-		bool _isAdmin;
 };
 
 #endif

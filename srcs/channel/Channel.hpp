@@ -39,10 +39,10 @@ class Channel
 
 	private:
 		std::string _channelName;
-		std::list<std::string> _operator;
-		std::map<std::string, Client*> _clients;
 		std::string _topic;
 		std::string _password;
+		std::list<std::string> _operator;
+		std::map<std::string, Client*> _clients;
 		unsigned long _limit;
 		int _mode;
 };
