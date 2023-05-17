@@ -479,6 +479,10 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 	}
 }
 
+#include <ctime>
+#include <sstream>
+#include <iostream>
+
 void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
@@ -532,7 +536,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 	if (req._hasTrailing)
 	{
 		channel->setTopic(req._trailing);
-		message._prefix = nickname;
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "332";
 		message._parameters.push_back(nickname);
 		message._parameters.push_back(channelName);
@@ -540,6 +544,19 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		message._hasTrailing = req._hasTrailing;
 		std::string res = message.toString();
 		broadcastChannelWithoutMe(sessionIndex, channel, res);
+		memset(&message, 0, sizeof(IRCMessage));
+		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
+		message._command = "333";
+		message._parameters.push_back(nickname);
+		message._parameters.push_back(channelName);
+		message._parameters.push_back(nickname);
+		std::ostringstream oss;
+		oss << std::time(0);
+		message._parameters.push_back(oss.str());
+		res = message.toString();
+		broadcastChannelWithoutMe(sessionIndex, channel, res);
+		return ;
+
 	}
 	else
 	{
