@@ -556,8 +556,6 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		message._parameters.push_back(oss.str());
 		res = message.toString();
 		broadcastChannelWithoutMe(sessionIndex, channel, res);
-		return ;
-
 	}
 	else
 	{
