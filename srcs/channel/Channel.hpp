@@ -18,12 +18,15 @@ class Channel
 		void removeClientByNickname(std::string nickname);
 		void addOperator(std::string nickname);
 		void removeOperator(std::string nickname);
+		void addInvitedClient(int sessionIndex);
+		void removeInvitedClient(int sessionIndex);
 
 		bool isOperator(std::string nickname);
 		bool isModeOn(int mode);
 		bool isLimitOver();
 		bool isPasswordTrue(std::string password);
 		bool isClientInChannel(std::string nickname);
+		bool isInvitedClient(int sessionIndex);
 
 		void setPassword(std::string password);
 		void setTopic(std::string topic);
@@ -43,6 +46,7 @@ class Channel
 		std::string _password;
 		std::list<std::string> _operator;
 		std::map<std::string, Client*> _clients;
+		std::set<int> _invitedClients;
 		unsigned long _limit;
 		int _mode;
 };
