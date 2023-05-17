@@ -272,7 +272,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	if (req._parameters.size() != 1)
+	if (req._parameters.size() < 1 || req._parameters.size() > 2)
 	{
 		message._command = "461";
 		message._trailing = "Not enough parameters";
@@ -281,9 +281,17 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		return ;
 	}
 
-	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
 	std::string nickname = client->getNickname();
+	std::list<std::string> channelNames = IRCMessage::split(req._parameters[0], ",");
+	std::list<std::string> passwords;
+
+	if (req._parameters.size() == 2)
+	{
+		passwords = IRCMessage::split(req._parameters[1], ",");
+	}
+
 	std::list<std::string>::iterator itChannelName;
+	std::list<std::string>::iterator itPassword = passwords.begin();
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
 		memset(&message, 0, sizeof(IRCMessage));
@@ -303,11 +311,40 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			continue ;
 		}
 
-		if (_channelManager.enterClient(*itChannelName, client) == FAIL)
+		Channel *channel = _channelManager.getChannel(*itChannelName);
+		std::string password = "";
+
+		if (itPassword != passwords.end())
 		{
-			/* new Channel 실패(malloc 실패) 코드 */
-			return ;
+			password = *itPassword;
+			itPassword++;
 		}
+		if (!channel)
+		{
+			channel = _channelManager.createChannel(*itChannelName);
+			if (!channel)
+			{
+				/* new Channel 실패(malloc 실패) 코드 */
+				return ;
+			}
+			channel->addOperator(nickname);
+		}
+		else 
+		{
+			if (channel->isModeOn(MODE_PASSWORD) && !channel->isPasswordTrue(password))
+			{
+				message._command = "475";
+				message._parameters.push_back(nickname);
+				message._parameters.push_back(*itChannelName);
+				message._trailing = "Cannot join channel (+k)";
+				std::string res = message.toString();
+				_sendPacketFunc(sessionIndex, res);
+				continue ;
+			}
+		}
+		
+		_channelManager.enterClient(*itChannelName, client);
+		
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "JOIN";
 		message._parameters.push_back(*itChannelName);

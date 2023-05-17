@@ -13,14 +13,15 @@ class ChannelManager
 		ChannelManager();
 		~ChannelManager();
 
-		int enterClient(std::string channelName, Client* client);
-		int leaveClient(Channel &channel, Client* client);
+		void enterClient(std::string channelName, Client* client);
+		void leaveClient(Channel &channel, Client* client);
 		bool isValidChannelName(std::string channelName);
 		bool isValidChannelLimit(std::string &channelLimit);
 		bool isValidChannelPassword(std::string &channelPassword);
 		void changeNickname(Client* client, std::string oldNickname, std::string newNickname);
 		std::string getChannelInfo(std::string channelName);
 
+		Channel* createChannel(std::string channelName);
 		Channel* getChannel(std::string channelName);
 
 	private:

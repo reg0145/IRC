@@ -8,27 +8,24 @@ ChannelManager::~ChannelManager()
 {
 }
 
-int ChannelManager::enterClient(std::string channelName, Client* client)
+Channel* ChannelManager::createChannel(std::string channelName)
+{
+	if (addChannel(channelName) == FAIL)
+	{
+		return NULL;
+	}
+	return getChannel(channelName);
+}
+
+void ChannelManager::enterClient(std::string channelName, Client* client)
 {
 	Channel* channel = getChannel(channelName);
 
-	if (!channel)
-	{
-		if (addChannel(channelName) == FAIL)
-		{
-			return FAIL;
-		}
-		channel = getChannel(channelName);
-		channel->addOperator(client->getNickname());
-	}
-
 	channel->addClient(client);
 	client->addChannel(channelName);
-
-	return SUCCESS;
 }
 
-int ChannelManager::leaveClient(Channel &channel, Client* client)
+void ChannelManager::leaveClient(Channel &channel, Client* client)
 {
 	std::string nickname = client->getNickname();
 
@@ -44,7 +41,6 @@ int ChannelManager::leaveClient(Channel &channel, Client* client)
 	{
 		removeChannel(&channel);
 	}
-	return SUCCESS;
 }
 
 bool ChannelManager::isValidChannelName(std::string channelName)
