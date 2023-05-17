@@ -343,8 +343,10 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 				_sendPacketFunc(sessionIndex, res);
 				continue ;
 			}
-			if (channel->isModeOn(MODE_INVITE_ONLY) && channel->isInvitedClient(sessionIndex))
+			if (channel->isModeOn(MODE_INVITE_ONLY))
 			{
+				if (!channel->isInvitedClient(sessionIndex))
+				{
 				message._command = "473";
 				message._parameters.push_back(nickname);
 				message._parameters.push_back(*itChannelName);
@@ -352,6 +354,11 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 				std::string res = message.toString();
 				_sendPacketFunc(sessionIndex, res);
 				continue ;
+				}
+				else
+				{
+					channel->removeInvitedClient(sessionIndex);
+				}
 			}
 			if (channel->isModeOn(MODE_LIMIT) && channel->isLimitOver())
 			{
