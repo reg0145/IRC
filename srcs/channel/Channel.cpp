@@ -77,7 +77,7 @@ bool Channel::isModeOn(int mode)
 
 bool Channel::isLimitOver()
 {
-	if (_clients.size() > _limit)
+	if (_clients.size() < _limit)
 	{
 		return false;
 	}
@@ -154,24 +154,6 @@ void Channel::setMode(int mode)
 void Channel::unSetMode(int mode)
 {
 	_mode &= ~mode;
-}
-
-bool Channel::isLimitOver()
-{
-	if (_clients.size() > _limit)
-	{
-		return false;
-	}
-	return true;
-}
-
-bool Channel::isPasswordTrue(std::string password)
-{
-	if (_password != password)
-	{
-		return false;
-	}
-	return true;
 }
 
 void Channel::setTopic(std::string topic)
