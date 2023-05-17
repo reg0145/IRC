@@ -519,7 +519,8 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	if (!channel->isOperator(nickname))
+	
+	if (channel->isModeOn(MODE_TOPIC) && !channel->isOperator(nickname))
 	{
 		message._command = "482";
 		message._parameters.push_back(channelName);
