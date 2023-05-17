@@ -1,5 +1,4 @@
 #include "PacketManager.hpp"
-#include <iostream>
 
 void (*PacketManager::_sendPacketFunc)(int sessionIndex, std::string &res) = 0;
 
@@ -648,7 +647,6 @@ void PacketManager::processQuit(int sessionIndex, IRCMessage &req)
 	std::cout << ">> client[" << sessionIndex << "] Disconnected <<" << std::endl;
 }
 
-#include <iostream>
 void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 {
 	IRCMessage message;
