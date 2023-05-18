@@ -8,6 +8,6 @@ int main(int argc, char *argv[])
 	}
 	IRCServer server;
 
-	server.init(8080, argv[2]);
+	server.init(argv[1], argv[2]);
 	server.start();
 }
