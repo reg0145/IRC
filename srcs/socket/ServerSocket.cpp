@@ -26,25 +26,17 @@ ServerSocket::ServerSocket()
 
 void ServerSocket::bind(char *strPort)
 {
-	int port;
+	char *end;
+	long port = std::strtol(strPort, &end, 10);
 
-	try
+	if (*end != '\0')
 	{
-		port = std::stoi(strPort);
-
-		if (port < 0 || port > 65535)
-		{
-			throw std::out_of_range("");
-		}
-	}
-	catch (const std::out_of_range& e)
-	{
-		std::cerr << "ServerSocket bind() : Port, out of range" << std::endl;
+		std::cerr << "ServerSocket bind() : Port, " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	catch (const std::invalid_argument& e)
+	if (port < 0 || port > 65535)
 	{
-		std::cerr << "ServerSocket bind() : Port, Invalid argument: " << std::endl;
+		std::cerr << "ServerSocket bind() : Port, out of range" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
