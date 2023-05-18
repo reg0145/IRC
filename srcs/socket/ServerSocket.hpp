@@ -12,7 +12,7 @@ class ServerSocket
 	public :
 		ServerSocket();
 
-		void bind(int port);
+		void bind(char *strPort);
 		void listen();
 		int accept();
 
