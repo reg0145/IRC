@@ -4,7 +4,7 @@ void SocketReactor<T>::init(T& object, EventHandler onEventSuccess, EventHandler
 {
 	if((_kqueue = kqueue()) < 0)
 	{
-		std::cerr << "SocketReactor init() : " << errno << std::endl;
+		std::cerr << "SocketReactor init() : " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
