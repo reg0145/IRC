@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <climits>
 #include "ChannelMode.hpp"
 #include "../client/Client.hpp"
 
