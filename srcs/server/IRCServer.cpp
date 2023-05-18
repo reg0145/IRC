@@ -37,6 +37,7 @@ void IRCServer::onRequestHandler(int socket)
 
 		if (_sessionManager.registerSession(clientSocket) == -1)
 		{
+			close(clientSocket);
 			return ;
 		}
 

@@ -8,7 +8,7 @@ ClientManager::ClientManager()
 
 		if (!client)
 		{
-			std::cerr << "ClientManager() : " << errno << std::endl;
+			std::cerr << "ClientManager() : " << strerror(errno) << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
