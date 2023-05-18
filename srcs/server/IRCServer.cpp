@@ -2,9 +2,8 @@
 
 std::deque<RecvPacketInfo> IRCServer::_packetQueue = std::deque<RecvPacketInfo>();
 
-void IRCServer::init(int port, char *password)
+void IRCServer::init(char *port, char *password)
 {
-
 	_serverSocket.bind(port);
 	_serverSocket.listen();
 
