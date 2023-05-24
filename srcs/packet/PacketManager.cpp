@@ -296,7 +296,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 	std::list<std::string>::iterator itPassword = passwords.begin();
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		if (!_channelManager.isValidChannelName(*itChannelName))
 		{
 			message._command = "403";
@@ -383,7 +383,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		std::string topic = channel->getTopic();
 		if (topic != "")
 		{
-			memset(&message, 0, sizeof(IRCMessage));
+			message.clear();
 			message._command = "332";
 			message._parameters.push_back(nickname);
 			message._parameters.push_back(*itChannelName);
@@ -392,7 +392,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			_sendPacketFunc(sessionIndex, res);
 		}
 
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		message._command = "353";
 		message._parameters.push_back(nickname);
 		message._parameters.push_back("=");
@@ -401,7 +401,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		res = message.toString();
 		broadcastChannel(*itChannelName, res);
 
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		message._command = "366";
 		message._parameters.push_back(nickname);
 		message._parameters.push_back(*itChannelName);
@@ -435,7 +435,7 @@ void PacketManager::processPart(int sessionIndex, IRCMessage &req)
 	std::list<std::string>::iterator itChannelName;
 	for (itChannelName = channelNames.begin(); itChannelName != channelNames.end(); itChannelName++)
 	{
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		Channel* channel = _channelManager.getChannel(*itChannelName);
 
 		if (!channel)
@@ -529,7 +529,7 @@ void PacketManager::processKick(int sessionIndex, IRCMessage &req)
 	std::list<std::string>::iterator itTargetName;
 	for (itTargetName = targetNames.begin(); itTargetName != targetNames.end(); itTargetName++)
 	{
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		Client* target = _clientManager.getClientByNickname(*itTargetName);
 		if (!channel->isClientInChannel(*itTargetName))
 		{
@@ -618,7 +618,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		std::string res = message.toString();
 		broadcastChannelWithoutMe(sessionIndex, channel, res);
 		
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "333";
 		message._parameters.push_back(nickname);
@@ -644,7 +644,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 			return;
 		}
 	}
-	memset(&message, 0, sizeof(IRCMessage));
+	message.clear();
 
 	message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 	message._command = "TOPIC";
@@ -683,7 +683,7 @@ void PacketManager::processPrivmsg(int sessionIndex, IRCMessage &req)
 	std::list<std::string> targets = IRCMessage::split(req._parameters[0], ",");
 	for (std::list<std::string>::const_iterator it = targets.begin(); it != targets.end(); ++it)
 	{
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		if (_channelManager.isValidChannelName(*it))
 		{
 			Channel* channel = _channelManager.getChannel(*it);
@@ -754,7 +754,7 @@ void PacketManager::processNotice(int sessionIndex, IRCMessage &req)
 	std::list<std::string> targets = IRCMessage::split(req._parameters[0], ",");
 	for (std::list<std::string>::const_iterator it = targets.begin(); it != targets.end(); ++it)
 	{
-		memset(&message, 0, sizeof(IRCMessage));
+		message.clear();
 		if (_channelManager.isValidChannelName(*it))
 		{
 			Channel* channel = _channelManager.getChannel(*it);
