@@ -1,6 +1,6 @@
 #include "IRCMessage.hpp"
 
-std::list<IRCMessage> IRCMessage::parse(const char* requests)
+std::list<IRCMessage> IRCMessage::parse(const std::string& requests)
 {
 	std::list<IRCMessage> IRCMessages;
 	std::list<std::string> messages;
