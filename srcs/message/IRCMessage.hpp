@@ -11,7 +11,7 @@
 class IRCMessage
 {
 	public:
-		static std::list<IRCMessage> parse(const char* requests);
+		static std::list<IRCMessage> parse(const std::string& requests);
 		static std::list<std::string> split(const std::string& str, const std::string& delimiter);
 
 		std::string toString();

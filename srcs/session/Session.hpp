@@ -23,8 +23,8 @@ class Session
 
 	private :
 		void close();
-
-		char _buffer[512];
+		char _tmp[512];
+		std::stringstream _buffer;
 		std::list<IRCMessage> _messages;
 		int _sessionIndex;
 		int _clientSocket;
