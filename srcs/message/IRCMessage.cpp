@@ -92,3 +92,11 @@ std::string IRCMessage::toString()
 
 	return oss.str();
 }
+
+void IRCMessage::clear()
+{
+	_prefix = "";
+	_command = "";
+	_parameters.clear();
+	_trailing = "";
+}

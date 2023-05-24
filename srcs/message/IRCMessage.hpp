@@ -15,6 +15,7 @@ class IRCMessage
 		static std::list<std::string> split(const std::string& str, const std::string& delimiter);
 
 		std::string toString();
+		void clear();
 
 		std::string _prefix;
 		std::string _command;
