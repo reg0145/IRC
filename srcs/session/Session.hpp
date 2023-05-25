@@ -2,7 +2,6 @@
 #define SESSION_HPP
 
 #include <list>
-#include <deque>
 #include <unistd.h>
 #include <netinet/in.h>
 #include "../message/IRCMessage.hpp"

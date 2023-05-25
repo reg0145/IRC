@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <iostream>
-#include "IRCMessage.hpp"
 
 class IRCMessage
 {
