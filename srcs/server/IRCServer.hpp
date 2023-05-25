@@ -2,7 +2,6 @@
 #define IRCSERVER_HPP
 
 #include <deque>
-#include <vector>
 #include <iostream>
 #include <cerrno>
 #include "../session/Session.hpp"

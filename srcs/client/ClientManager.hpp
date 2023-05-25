@@ -2,6 +2,7 @@
 #define CLIENTMANAGER_HPP
 
 #include <map>
+#include <new>
 #include <vector>
 #include <string>
 #include <cerrno>

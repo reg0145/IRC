@@ -1,5 +1,5 @@
-#ifndef IRC_CHANNELMODE_HPP
-#define IRC_CHANNELMODE_HPP
+#ifndef CHANNELMODE_HPP
+#define CHANNELMODE_HPP
 
 enum ChannelMode
 {

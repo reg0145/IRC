@@ -2,6 +2,7 @@
 #define CHANNELMANAGER_HPP
 
 #include <map>
+#include <new>
 #include <string>
 #include <cstdlib>
 #include "Channel.hpp"
