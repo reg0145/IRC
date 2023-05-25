@@ -11,8 +11,6 @@ Session::~Session()
 	::close(_clientSocket);
 }
 
-
-#include <iostream>
 void Session::onReadable()
 {
 	int received = recv(_clientSocket, _tmp, sizeof(_tmp) - 1, 0);
