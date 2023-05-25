@@ -2,6 +2,7 @@
 #define SESSIONMANAGER_HPP
 
 #include <map>
+#include <new>
 #include <deque>
 #include <vector>
 #include "Session.hpp"
