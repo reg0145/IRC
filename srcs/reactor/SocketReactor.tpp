@@ -17,7 +17,7 @@ template <typename T>
 void SocketReactor<T>::addSocket(int clientSocket)
 {
 	struct kevent event;
-	EV_SET(&event, clientSocket, EVFILT_READ, EV_ADD, 0, 0, 0);
+	EV_SET(&event, clientSocket, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, 0);
 	kevent(_kqueue, &event, 1, 0, 0, 0);
 }
 
@@ -25,7 +25,7 @@ template <typename T>
 void SocketReactor<T>::removeSocket(int clientSocket)
 {
 	struct kevent event;
-	EV_SET(&event, clientSocket, EVFILT_READ, EV_DELETE, 0, 0, 0);
+	EV_SET(&event, clientSocket, EVFILT_READ | EVFILT_WRITE, EV_DELETE, 0, 0, 0);
 	kevent(_kqueue, &event, 1, 0, 0, 0);
 }
 
@@ -52,6 +52,10 @@ void SocketReactor<T>::run()
 		if (_currentEvent->filter == EVFILT_READ)
 		{
 			(_object->*_onEventSuccess)(_currentEvent->ident);
+		}
+		if (_currentEvent->filter == EVFILT_WRITE)
+		{
+			(_object->*_onEventError)(_currentEvent->ident);
 		}
 	}
 }
