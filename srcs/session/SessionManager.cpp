@@ -70,8 +70,16 @@ void SessionManager::freeSessionIndex(int sessionIndex)
 
 Session* SessionManager::getSessionBySocket(int clientSocket)
 {
-	int sessionIndex = _sessionIndexMap[clientSocket];
-	return _sessions[sessionIndex];
+	std::map<int, int>::iterator itFind = _sessionIndexMap.find(clientSocket);
+
+	if (itFind != _sessionIndexMap.end())
+	{
+		return _sessions[itFind->second];
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
 void SessionManager::sendPacketFunc(int sessionIndex, std::string &res)
