@@ -331,7 +331,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 			}
 			channel->addOperator(nickname);
 		}
-		else 
+		else
 		{
 			if (channel->isModeOn(MODE_PASSWORD) && !channel->isPasswordTrue(password))
 			{
@@ -373,7 +373,7 @@ void PacketManager::processJoin(int sessionIndex, IRCMessage &req)
 		}
 
 		_channelManager.enterClient(*channel, client);
-		
+
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "JOIN";
 		message._parameters.push_back(*itChannelName);
@@ -596,7 +596,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		_sendPacketFunc(sessionIndex, res);
 		return ;
 	}
-	
+
 	if (channel->isModeOn(MODE_TOPIC) && !channel->isOperator(nickname))
 	{
 		message._command = "482";
@@ -617,7 +617,7 @@ void PacketManager::processTopic(int sessionIndex, IRCMessage &req)
 		message._hasTrailing = req._hasTrailing;
 		std::string res = message.toString();
 		broadcastChannelWithoutMe(sessionIndex, channel, res);
-		
+
 		message.clear();
 		message._prefix = nickname + "!" + client->getUsername() + "@" + client->getServername();
 		message._command = "333";
@@ -834,6 +834,11 @@ void PacketManager::processMode(int sessionIndex, IRCMessage &req)
 	}
 
 	/* 파라미터 개수 확인 */
+	if (req._parameters.size() == 1)
+	{
+		return ;
+	}
+
 	if (req._parameters.size() < 2)
 	{
 		message._command = "461";
