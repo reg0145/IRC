@@ -65,6 +65,12 @@ void IRCServer::onRequestErrorHandler(int socket)
 	}
 	else
 	{
+		IRCMessage message;
+		message.command = "QUIT";
+		int sessionIndex;
+		sessionIndex = _sessionManager.getSessionBySocket(socket)->getSessionIndex();
+
+		_packetManager.process(sessionIndex, message);
 		_sessionManager.unRegisterSessionBySocket(socket);
 	}
 }
@@ -74,6 +80,11 @@ void IRCServer::process()
 	for (std::deque<RecvPacketInfo>::iterator it = _packetQueue.begin(); it != _packetQueue.end(); ++it)
 	{
 		_packetManager.process(it->sessionIndex, it->message);
+
+		if (it->message._command == "QUIT")
+		{
+			_sessionManager.unRegisterSession(it->sessionIndex);
+		}
 	}
 	_packetQueue.clear();
 }
