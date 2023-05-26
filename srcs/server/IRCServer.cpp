@@ -52,7 +52,12 @@ void IRCServer::onRequestHandler(int socket)
 	}
 	else
 	{
-		_sessionManager.getSessionBySocket(socket)->onReadable();
+		Session* session = _sessionManager.getSessionBySocket(socket);
+
+		if (session != NULL)
+		{
+			session->onReadable();
+		}
 	}
 }
 
@@ -65,7 +70,20 @@ void IRCServer::onRequestErrorHandler(int socket)
 	}
 	else
 	{
-		_sessionManager.unRegisterSessionBySocket(socket);
+		Session* session = _sessionManager.getSessionBySocket(socket);
+
+		if (session)
+		{
+			IRCMessage message;
+			message._command = "QUIT";
+
+			_packetManager.process(session->getSessionIndex(), message);
+			_sessionManager.unRegisterSessionBySocket(socket);
+		}
+		else
+		{
+			close(socket);
+		}
 	}
 }
 
