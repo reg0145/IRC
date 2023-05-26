@@ -17,7 +17,7 @@ class Session
 		void onReadable();
 		void sendPacket(std::string&);
 
-		int	getSessionIndex();
+		int getSessionIndex();
 		int getClientSocket();
 
 		static void(*_addPacketFunc)(int sessionIndex, IRCMessage message);
