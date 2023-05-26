@@ -74,11 +74,6 @@ void IRCServer::process()
 	for (std::deque<RecvPacketInfo>::iterator it = _packetQueue.begin(); it != _packetQueue.end(); ++it)
 	{
 		_packetManager.process(it->sessionIndex, it->message);
-
-		if (it->message._command == "QUIT")
-		{
-			_sessionManager.unRegisterSession(it->sessionIndex);
-		}
 	}
 	_packetQueue.clear();
 }

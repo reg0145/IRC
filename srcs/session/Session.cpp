@@ -66,6 +66,11 @@ int Session::getClientSocket()
 	return _clientSocket;
 }
 
+int Session::getSessionIndex()
+{
+	return _sessionIndex;
+}
+
 void Session::sendPacket(std::string &res)
 {
 	send(_clientSocket, res.c_str(), res.size(), 0);

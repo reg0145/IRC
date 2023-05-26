@@ -44,6 +44,12 @@ void SocketReactor<T>::run()
 		if (_currentEvent->flags & EV_ERROR)
 		{
 			(_object->*_onEventError)(_currentEvent->ident);
+			continue;
+		}
+		if (_currentEvent->filter == EVFILT_WRITE)
+		{
+			(_object->*_onEventError)(_currentEvent->ident);
+			continue;
 		}
 		if (_currentEvent->flags & EV_EOF)
 		{
@@ -52,10 +58,6 @@ void SocketReactor<T>::run()
 		if (_currentEvent->filter == EVFILT_READ)
 		{
 			(_object->*_onEventSuccess)(_currentEvent->ident);
-		}
-		if (_currentEvent->filter == EVFILT_WRITE)
-		{
-			(_object->*_onEventError)(_currentEvent->ident);
 		}
 	}
 }
