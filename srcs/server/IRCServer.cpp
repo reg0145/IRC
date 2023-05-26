@@ -35,6 +35,13 @@ void IRCServer::onRequestHandler(int socket)
 			return ;
 		}
 
+		if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0)
+		{
+			std::cerr << "ClientSocket fcntl() : " << strerror(errno) << std::endl;
+			close(clientSocket);
+			return ;
+		}
+
 		if (_sessionManager.registerSession(clientSocket) == -1)
 		{
 			close(clientSocket);

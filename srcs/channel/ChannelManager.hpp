@@ -4,6 +4,7 @@
 #include <map>
 #include <new>
 #include <string>
+#include <climits>
 #include <cstdlib>
 #include "Channel.hpp"
 #include "../packet/PacketCode.hpp"
